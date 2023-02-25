@@ -1,0 +1,13 @@
+FROM python:3.11-alpine
+
+ENV PYTHONPATH /app
+EXPOSE 8000
+
+WORKDIR /app
+ADD ./requirements.txt .
+
+RUN pip install -r requirements.txt
+
+ADD . /app
+
+CMD uvicorn app:app --reload

@@ -1,0 +1,10 @@
+version: "3.7"
+services:
+  api:
+    container_name: protobox-gateway-api
+    image: protobox-gateway-api:0.1
+    build:
+      context: ./api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
