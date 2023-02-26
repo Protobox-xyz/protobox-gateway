@@ -13,6 +13,10 @@ services:
     networks:
       - protobox-gateway-network
     restart: unless-stopped
+    depends_on:
+      - mongo
+    environment:
+      - MONGODB_CONNECTION_STRING=mongodb://mongo:27017/
   nginx:
     image: nginx:latest
     container_name: protobox-gateway-nginx
@@ -24,4 +28,14 @@ services:
     ports:
       - "80:80"
       - "443:443"
+    restart: unless-stopped
+  mongo:
+    container_name: protobox-gateway-mongo
+    image: mongo
+    ports:
+      - "127.0.0.1:27017:27017"
+    networks:
+      - protobox-gateway-network
+    volumes:
+      - /home/protobox-data/mongodb:/data/db
     restart: unless-stopped
