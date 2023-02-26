@@ -11,7 +11,7 @@ from settings import MONGODB
 
 app = FastAPI()
 
-api = FastAPI(title="DLS API")
+api = FastAPI(title="Protobox API")
 app.mount("/api", api)
 
 
