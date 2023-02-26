@@ -37,6 +37,40 @@ def list_buckets(owner: str = Header(alias="x-amz-security-token"), ):
     return Response(content=content, media_type="application/xml")
 
 
+@api.put("/{bucket}/{key}")
+async def create_object(
+        bucket: str,
+        key: str,
+        request: Request,
+        owner: str = Header(alias="x-amz-security-token"),
+):
+    logging.warning(f"Creating object {bucket}/{key}")
+    content = await request.body()
+    MONGODB.objects.insert_one({
+        "_id": {"bucket": bucket, "key": key},
+        "bucket": bucket,
+        "key": key,
+        "owner": owner,
+        "CreationDate": datetime.now(),
+        "Content": content
+    })
+    content = dicttoxml({}, attr_type=False, custom_root="CreateBucketConfiguration")
+    return Response(content=content, media_type="application/xml")
+
+
+@api.get("/{bucket}/{key}")
+async def get_object(
+        bucket: str,
+        key: str,
+        owner: str = Header(alias="x-amz-security-token"),
+):
+    data = MONGODB.objects.find_one({
+        "_id": {"bucket": bucket, "key": key},
+        "owner": owner,
+    })
+    return Response(content=data["Content"], media_type="application/octet-stream")
+
+
 @api.put("/{bucket}")
 def create_bucket(
         bucket: str,

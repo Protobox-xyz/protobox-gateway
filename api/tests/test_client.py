@@ -4,10 +4,10 @@ import boto3
 import botocore.config
 
 
-def test_client():
+def get_client():
     session = boto3.session.Session()
     token = uuid4().hex
-    client = session.client(
+    return session.client(
         's3',
         config=botocore.config.Config(
             s3={'addressing_style': 'path'}
@@ -17,6 +17,22 @@ def test_client():
         aws_secret_access_key=token,
         aws_access_key_id=token,
     )
+
+
+def test_objects():
+    client = get_client()
+
+    new_bucket = uuid4().hex
+    client.create_bucket(Bucket=new_bucket)
+
+    client.put_object(Bucket=new_bucket, Key="test", Body="test")
+
+    data = client.get_object(Bucket=new_bucket, Key="test")
+    assert data["Body"].read() == b"test"
+
+
+def test_buckets():
+    client = get_client()
     buckets = client.list_buckets()
     assert len(buckets["Buckets"]) == 0
 
