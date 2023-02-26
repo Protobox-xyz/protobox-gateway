@@ -25,10 +25,22 @@ def test_objects():
     new_bucket = uuid4().hex
     client.create_bucket(Bucket=new_bucket)
 
+    data = client.list_objects(Bucket=new_bucket)
+    assert "Contents" not in data or len(data["Contents"]) == 0
+
     client.put_object(Bucket=new_bucket, Key="test", Body="test")
 
     data = client.get_object(Bucket=new_bucket, Key="test")
     assert data["Body"].read() == b"test"
+
+    data = client.list_objects(Bucket=new_bucket)
+    assert len(data["Contents"]) == 1
+    assert data["Contents"][0]["Key"] == "test"
+
+    client.delete_object(Bucket=new_bucket, Key="test")
+
+    data = client.list_objects(Bucket=new_bucket)
+    assert "Contents" not in data or len(data["Contents"]) == 0
 
 
 def test_buckets():
@@ -41,6 +53,7 @@ def test_buckets():
 
     buckets = client.list_buckets()
     assert len(buckets["Buckets"]) == 1
+    assert buckets["Buckets"][0]["Name"] == new_bucket
 
     client.delete_bucket(Bucket=new_bucket)
 

@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime
+from xml.dom import minidom
 
 import uvicorn
 from dicttoxml import dicttoxml
@@ -23,7 +24,18 @@ def get_owner_data(owner):
 
 
 def get_owner_buckets(owner):
-    yield from MONGODB.buckets.find({"owner": owner})
+    yield from MONGODB.buckets.find({"Owner": owner})
+
+
+def get_owner_objects(bucket, owner, prefix=None):
+    query = {
+        "Owner": owner,
+        "Bucket": bucket,
+    }
+    if prefix:
+        query["Key"] = {"$regex": f"^{prefix}"}
+    yield from MONGODB.objects.find(query,
+                                    {"_id": 0, "Content": 0})
 
 
 # List all buckets
@@ -47,10 +59,10 @@ async def create_object(
     logging.warning(f"Creating object {bucket}/{key}")
     content = await request.body()
     MONGODB.objects.insert_one({
-        "_id": {"bucket": bucket, "key": key},
-        "bucket": bucket,
-        "key": key,
-        "owner": owner,
+        "_id": {"Bucket": bucket, "Key": key},
+        "Bucket": bucket,
+        "Key": key,
+        "Owner": owner,
         "CreationDate": datetime.now(),
         "Content": content
     })
@@ -65,10 +77,40 @@ async def get_object(
         owner: str = Header(alias="x-amz-security-token"),
 ):
     data = MONGODB.objects.find_one({
-        "_id": {"bucket": bucket, "key": key},
-        "owner": owner,
+        "_id": {"Bucket": bucket, "Key": key},
+        "Owner": owner,
     })
     return Response(content=data["Content"], media_type="application/octet-stream")
+
+
+@api.delete("/{bucket}/{key}")
+async def delete_object(
+        bucket: str,
+        key: str,
+        owner: str = Header(alias="x-amz-security-token"),
+):
+    MONGODB.objects.delete_one({
+        "_id": {"Bucket": bucket, "Key": key},
+        "Owner": owner,
+    })
+    return Response(status_code=204)
+
+
+@api.get("/{bucket}")
+async def list_objects(
+        bucket: str,
+        prefix: str = None,
+        owner: str = Header(alias="x-amz-security-token"),
+):
+    data = get_owner_objects(bucket, owner, prefix=prefix)
+    root = minidom.Document()
+    xml = root.createElement('ListBucketResult')
+    root.appendChild(xml)
+    for obj in data:
+        xml.appendChild(root.createElement('Contents'))
+        xml.lastChild.appendChild(root.createElement('Key')).appendChild(root.createTextNode(obj["Key"]))
+        xml.lastChild.appendChild(root.createElement('LastModified')).appendChild(root.createTextNode(obj["CreationDate"].isoformat()))
+    return Response(content=root.toprettyxml(), media_type="application/octet-stream")
 
 
 @api.put("/{bucket}")
@@ -80,7 +122,7 @@ def create_bucket(
     MONGODB.buckets.insert_one({
         "_id": bucket,
         "Name": bucket,
-        "owner": owner,
+        "Owner": owner,
         "CreationDate": datetime.now()
     })
     content = dicttoxml({}, attr_type=False, custom_root="CreateBucketConfiguration")
@@ -95,7 +137,7 @@ def delete_bucket(
     logging.warning(f"Deleting bucket {bucket}")
     MONGODB.buckets.delete_one({
         "_id": bucket,
-        "owner": owner,
+        "Owner": owner,
     })
     return Response(status_code=204)
 
