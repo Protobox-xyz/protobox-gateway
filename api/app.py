@@ -53,5 +53,18 @@ def create_bucket(
     return Response(content=content, media_type="application/xml")
 
 
+@api.delete("/{bucket}")
+def delete_bucket(
+        bucket: str,
+        owner: str = Header(alias="x-amz-security-token"),
+):
+    logging.warning(f"Deleting bucket {bucket}")
+    MONGODB.buckets.delete_one({
+        "_id": bucket,
+        "owner": owner,
+    })
+    return Response(status_code=204)
+
+
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

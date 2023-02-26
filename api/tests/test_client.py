@@ -25,3 +25,8 @@ def test_client():
 
     buckets = client.list_buckets()
     assert len(buckets["Buckets"]) == 1
+
+    client.delete_bucket(Bucket=new_bucket)
+
+    buckets = client.list_buckets()
+    assert len(buckets["Buckets"]) == 0
