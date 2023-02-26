@@ -83,6 +83,21 @@ async def get_object(
     return Response(content=data["Content"], media_type="application/octet-stream")
 
 
+@api.head("/{bucket}/{key}")
+async def head_object(
+        bucket: str,
+        key: str,
+        owner: str = Header(alias="x-amz-security-token"),
+):
+    data = MONGODB.objects.find_one({
+        "_id": {"Bucket": bucket, "Key": key},
+        "Owner": owner,
+    })
+    if data:
+        return Response(status_code=200)
+    return Response(status_code=404)
+
+
 @api.delete("/{bucket}/{key}")
 async def delete_object(
         bucket: str,
@@ -109,7 +124,8 @@ async def list_objects(
     for obj in data:
         xml.appendChild(root.createElement('Contents'))
         xml.lastChild.appendChild(root.createElement('Key')).appendChild(root.createTextNode(obj["Key"]))
-        xml.lastChild.appendChild(root.createElement('LastModified')).appendChild(root.createTextNode(obj["CreationDate"].isoformat()))
+        xml.lastChild.appendChild(root.createElement('LastModified')).appendChild(
+            root.createTextNode(obj["CreationDate"].isoformat()))
     return Response(content=root.toprettyxml(), media_type="application/octet-stream")
 
 
