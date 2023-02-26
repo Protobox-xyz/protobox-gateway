@@ -2,6 +2,8 @@ from uuid import uuid4
 
 import boto3
 import botocore.config
+import pytest
+from botocore.exceptions import ClientError
 
 
 def get_client():
@@ -30,6 +32,9 @@ def test_objects():
 
     client.put_object(Bucket=new_bucket, Key="test", Body="test")
 
+    data = client.head_object(Bucket=new_bucket, Key="test")
+    assert data["ResponseMetadata"]["HTTPStatusCode"] == 200
+
     data = client.get_object(Bucket=new_bucket, Key="test")
     assert data["Body"].read() == b"test"
 
@@ -38,6 +43,9 @@ def test_objects():
     assert data["Contents"][0]["Key"] == "test"
 
     client.delete_object(Bucket=new_bucket, Key="test")
+
+    with pytest.raises(ClientError):
+        client.head_object(Bucket=new_bucket, Key="test")
 
     data = client.list_objects(Bucket=new_bucket)
     assert "Contents" not in data or len(data["Contents"]) == 0
