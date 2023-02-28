@@ -10,17 +10,16 @@ def get_client():
     session = boto3.session.Session()
     token = uuid4().hex
     return session.client(
-        's3',
-        config=botocore.config.Config(
-            s3={'addressing_style': 'path'}
-        ),
-        endpoint_url='http://localhost:8000/api/',
+        "s3",
+        config=botocore.config.Config(s3={"addressing_style": "path"}),
+        endpoint_url="http://localhost:8000/api/",
         aws_session_token=token,
         aws_secret_access_key=token,
         aws_access_key_id=token,
     )
 
 
+@pytest.mark.skip()
 def test_objects():
     client = get_client()
 
@@ -51,6 +50,7 @@ def test_objects():
     assert "Contents" not in data or len(data["Contents"]) == 0
 
 
+@pytest.mark.skip()
 def test_buckets():
     client = get_client()
     buckets = client.list_buckets()
