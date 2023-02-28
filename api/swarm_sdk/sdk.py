@@ -1,3 +1,4 @@
+import io
 import mimetypes
 from urllib.parse import urljoin
 
@@ -21,13 +22,16 @@ class SwarmClient:
         response.raise_for_status()
         return response.content
 
-    def upload(self, file: str, name: str = None, content_type: str = None):
+    def upload(self, file: str | bytes, name: str = None, content_type: str = None):
         headers = {}
         assert self.batch_id
         headers["Swarm-Postage-Batch-Id"] = self.batch_id
         file_obj = None
         if isinstance(file, str):
             file_obj = open(file, "rb")
+        elif isinstance(file, bytes):
+            file_obj = io.BytesIO(file)
+
         content_type = content_type or mimetypes.guess_type(file)[0]
         headers["Content-Type"] = content_type
         api_url = self.generate_api_url()

@@ -8,7 +8,8 @@ from fastapi import Header
 from starlette.requests import Request
 from starlette.responses import Response
 
-from settings import MONGODB
+from settings import MONGODB, SWARM_SERVER_URL
+from swarm_sdk.sdk import SwarmClient
 
 router = APIRouter(prefix="", tags=["objects"])
 
@@ -32,6 +33,10 @@ async def create_object(
 ):
     logging.warning(f"Creating object {bucket}/{key}")
     content = await request.body()
+    content_type = request.headers.get("Content-Type")
+    swarm_client = SwarmClient(owner, server_url=SWARM_SERVER_URL)
+    swarm_upload_data = swarm_client.upload(content, content_type=content_type, name=key)
+    swarm_upload_data["SwarmServerUrl"] = SWARM_SERVER_URL
     MONGODB.objects.insert_one(
         {
             "_id": {"Bucket": bucket, "Key": key},
@@ -39,7 +44,7 @@ async def create_object(
             "Key": key,
             "Owner": owner,
             "CreationDate": datetime.now(),
-            "Content": content,
+            "SwarmData": swarm_upload_data,
         }
     )
     content = dicttoxml({}, attr_type=False, custom_root="CreateBucketConfiguration")
@@ -58,7 +63,10 @@ async def get_object(
             "Owner": owner,
         }
     )
-    return Response(content=data["Content"], media_type="application/octet-stream")
+    swarm_client = SwarmClient(server_url=data["SwarmData"]["SwarmServerUrl"])
+    content = swarm_client.download(data["SwarmData"]["reference"])
+
+    return Response(content=content, media_type="application/octet-stream")
 
 
 @router.head("/{bucket}/{key}")
