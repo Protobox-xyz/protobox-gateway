@@ -29,10 +29,10 @@ class SwarmClient:
         file_obj = None
         if isinstance(file, str):
             file_obj = open(file, "rb")
+            content_type = content_type or mimetypes.guess_type(file)[0]
         elif isinstance(file, bytes):
             file_obj = io.BytesIO(file)
-
-        content_type = content_type or mimetypes.guess_type(file)[0]
+        content_type = content_type or "application/octet-stream"
         headers["Content-Type"] = content_type
         api_url = self.generate_api_url()
         response = requests.post(api_url, params={"name": name}, headers=headers, data=file_obj)

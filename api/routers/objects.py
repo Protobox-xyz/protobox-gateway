@@ -8,7 +8,7 @@ from fastapi import Header
 from starlette.requests import Request
 from starlette.responses import Response
 
-from settings import MONGODB, SWARM_SERVER_URL
+from settings import MONGODB, SWARM_SERVER_URL, SWARM_BATCH_ID
 from swarm_sdk.sdk import SwarmClient
 
 router = APIRouter(prefix="", tags=["objects"])
@@ -34,7 +34,7 @@ async def create_object(
     logging.warning(f"Creating object {bucket}/{key}")
     content = await request.body()
     content_type = request.headers.get("Content-Type")
-    swarm_client = SwarmClient(owner, server_url=SWARM_SERVER_URL)
+    swarm_client = SwarmClient(SWARM_BATCH_ID, server_url=SWARM_SERVER_URL)
     swarm_upload_data = swarm_client.upload(content, content_type=content_type, name=key)
     swarm_upload_data["SwarmServerUrl"] = SWARM_SERVER_URL
     MONGODB.objects.insert_one(
