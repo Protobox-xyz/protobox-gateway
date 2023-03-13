@@ -1,4 +1,4 @@
-fastapi[all]
-dicttoxml
-pymongo
-requests
+fastapi[all]==0.94.0
+dicttoxml==1.7.16
+pymongo==4.3.3
+requests==2.28.1
