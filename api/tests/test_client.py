@@ -3,6 +3,7 @@ from uuid import uuid4
 import boto3
 import botocore.config
 import pytest
+from botocore.credentials import Credentials
 from botocore.exceptions import ClientError
 
 
@@ -17,6 +18,22 @@ def get_client():
         aws_secret_access_key=token,
         aws_access_key_id=token,
     )
+
+
+def get_client_v2():
+    session = boto3.session.Session()
+    token = uuid4().hex
+
+    creds = Credentials("", "", token)
+    first_credential_provider = session._session.get_component("credential_provider").providers
+    first_credential_provider.load = lambda: creds
+
+    client = session.client(
+        "s3",
+        config=botocore.config.Config(s3={"addressing_style": "path"}),
+        endpoint_url="http://localhost:8000/api/",
+    )
+    return client
 
 
 @pytest.mark.skip()
