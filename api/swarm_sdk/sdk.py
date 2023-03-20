@@ -4,6 +4,8 @@ from urllib.parse import urljoin
 
 import requests
 
+from swarm_sdk.exceptions import BatchIDRequiredException
+
 
 class SwarmClient:
     def __init__(self, batch_id: str = None, server_url: str = "http://localhost:1633/"):
@@ -23,9 +25,9 @@ class SwarmClient:
         return response.content
 
     def upload(self, file: str | bytes, name: str = None, content_type: str = None):
-        headers = {}
-        assert self.batch_id
-        headers["Swarm-Postage-Batch-Id"] = self.batch_id
+        if not self.batch_id:
+            raise BatchIDRequiredException("Batch ID is required for uploading files")
+
         file_obj = None
         if isinstance(file, str):
             file_obj = open(file, "rb")
@@ -33,8 +35,10 @@ class SwarmClient:
         elif isinstance(file, bytes):
             file_obj = io.BytesIO(file)
         content_type = content_type or "application/octet-stream"
-        headers["Content-Type"] = content_type
+
+        headers = {"Swarm-Postage-Batch-Id": self.batch_id, "Content-Type": content_type}
         api_url = self.generate_api_url()
         response = requests.post(api_url, params={"name": name}, headers=headers, data=file_obj)
         response.raise_for_status()
+
         return response.json()
