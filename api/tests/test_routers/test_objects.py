@@ -114,4 +114,3 @@ def test_list_object(api):
     # data.ListBucketResult.Contents should be list, but it is parsed as dict,
     # so if type is dict it means there is only one item in list
     assert type(data["ListBucketResult"]["Contents"]) == dict
-

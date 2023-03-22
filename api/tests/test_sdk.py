@@ -34,7 +34,7 @@ def test_swarm_sdk_upload_from_bytes(mocker):
         server_url="http://104.237.159.189:1633/bzz",
     )
 
-    data = b'Lorem ipsum text generator is a free online tool for generating dummy text or lipsum.\n'
+    data = b"Lorem ipsum text generator is a free online tool for generating dummy text or lipsum.\n"
     swarm.upload(data, content_type="text/plain", name="text_file.txt")
     headers = {
         "Content-Type": "text/plain",

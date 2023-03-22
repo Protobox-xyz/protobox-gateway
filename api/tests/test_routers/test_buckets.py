@@ -30,7 +30,6 @@ def test_list_buckets_api_and_create_bucket(api):
     assert data["ListAllMyBucketsResult"]["Owner"]["ID"] == TOKEN
     assert data["ListAllMyBucketsResult"]["Buckets"] is None
 
-
     # create bucket
     bucket_name = "test"
     response = api.put(f"http://0.0.0.0:8000/api/{bucket_name}/", headers=HEADERS)
@@ -61,7 +60,6 @@ def test_create_bucket_and_delete_bucket(api):
     assert data["ListAllMyBucketsResult"]["Owner"]["ID"] == TOKEN
     assert data["ListAllMyBucketsResult"]["Buckets"] is not None
     assert len(data["ListAllMyBucketsResult"]["Buckets"]["item"]) == 3
-
 
     response = api.delete(f"http://0.0.0.0:8000/api/test_0/", headers=HEADERS)
     assert response.is_success
