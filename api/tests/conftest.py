@@ -1,13 +1,10 @@
 import mongomock
+import pytest
+from starlette.testclient import TestClient
 
 import settings
 
 settings.MONGODB = mongomock.MongoClient().protobox
-
-
-import pytest
-from starlette.testclient import TestClient
-
 
 TOKEN = "123123"
 HEADERS = {"x-amz-security-token": TOKEN}
