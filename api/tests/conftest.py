@@ -9,6 +9,10 @@ import pytest
 from starlette.testclient import TestClient
 
 
+TOKEN = "123123"
+HEADERS = {"x-amz-security-token": TOKEN}
+
+
 @pytest.fixture
 def api():
     from app import app

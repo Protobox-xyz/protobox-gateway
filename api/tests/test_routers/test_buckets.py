@@ -2,8 +2,7 @@ from pprint import pprint
 
 import xmltodict
 
-TOKEN = "123123"
-HEADERS = {"x-amz-security-token": TOKEN}
+from tests.conftest import HEADERS, TOKEN
 
 
 def test_list_buckets_api_wo_token(api):
