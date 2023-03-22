@@ -63,6 +63,8 @@ async def get_object(
             "Owner": owner,
         }
     )
+    if not data:
+        return Response(status_code=404)
     swarm_client = SwarmClient(server_url=data["SwarmData"]["SwarmServerUrl"])
     content = swarm_client.download(data["SwarmData"]["reference"])
 
@@ -92,6 +94,7 @@ async def delete_object(
     key: str,
     owner: str = Header(alias="x-amz-security-token"),
 ):
+    # TODO: delete from swarm?
     MONGODB.objects.delete_one(
         {
             "_id": {"Bucket": bucket, "Key": key},
