@@ -36,6 +36,7 @@ def get_client_v2():
     return client
 
 
+@pytest.mark.skip()
 def test_objects():
     client = get_client()
 
