@@ -9,14 +9,14 @@ from botocore.exceptions import ClientError
 
 def get_client():
     session = boto3.session.Session()
-    token = uuid4().hex
+    batch_id = "dba3817afddca43d988513961a13f2d2b3220affa415375726a6d1a2d83c4144"
     return session.client(
         "s3",
         config=botocore.config.Config(s3={"addressing_style": "path"}),
         endpoint_url="http://localhost:8000/api/",
-        aws_session_token=token,
-        aws_secret_access_key=token,
-        aws_access_key_id=token,
+        aws_session_token=batch_id,
+        aws_secret_access_key=batch_id,
+        aws_access_key_id=batch_id,
     )
 
 
@@ -36,7 +36,6 @@ def get_client_v2():
     return client
 
 
-@pytest.mark.skip()
 def test_objects():
     client = get_client()
 
@@ -44,6 +43,9 @@ def test_objects():
     client.create_bucket(Bucket=new_bucket)
 
     data = client.list_objects(Bucket=new_bucket)
+    assert "Contents" not in data or len(data["Contents"]) == 0
+
+    data = client.list_objects_v2(Bucket=new_bucket, ContinuationToken="12", MaxKeys=1)
     assert "Contents" not in data or len(data["Contents"]) == 0
 
     client.put_object(Bucket=new_bucket, Key="test", Body="test")
