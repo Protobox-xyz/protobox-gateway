@@ -6,17 +6,20 @@ import pytest
 from botocore.credentials import Credentials
 from botocore.exceptions import ClientError
 
+ENDPOINT_URL = "https://s3.protobox.xyz/api/"
+BATCH_ID = "9f151ded49c44b529b98f42d7565002aa876b78298e4bccc39782c2ad709ccc7"
+
 
 def get_client():
     session = boto3.session.Session()
-    batch_id = "4df27c65e721789a006418ac20c572a57f3c03562be2a58130af3d1c61663fac"
+
     return session.client(
         "s3",
+        endpoint_url=ENDPOINT_URL,
         config=botocore.config.Config(s3={"addressing_style": "path"}),
-        endpoint_url="http://localhost:8000/api/",
-        aws_session_token=batch_id,
-        aws_secret_access_key=batch_id,
-        aws_access_key_id=batch_id,
+        aws_session_token=BATCH_ID,
+        aws_secret_access_key=BATCH_ID,
+        aws_access_key_id=BATCH_ID,
     )
 
 
@@ -30,8 +33,8 @@ def get_client_v2():
 
     client = session.client(
         "s3",
+        endpoint_url=ENDPOINT_URL,
         config=botocore.config.Config(s3={"addressing_style": "path"}),
-        endpoint_url="http://localhost:8000/api/",
     )
     return client
 
