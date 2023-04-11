@@ -16,27 +16,10 @@ def get_client():
     return session.client(
         "s3",
         endpoint_url=ENDPOINT_URL,
-        config=botocore.config.Config(s3={"addressing_style": "path"}),
         aws_session_token=BATCH_ID,
         aws_secret_access_key=BATCH_ID,
         aws_access_key_id=BATCH_ID,
     )
-
-
-def get_client_v2():
-    session = boto3.session.Session()
-    token = uuid4().hex
-
-    creds = Credentials("", "", token)
-    first_credential_provider = session._session.get_component("credential_provider").providers
-    first_credential_provider.load = lambda: creds
-
-    client = session.client(
-        "s3",
-        endpoint_url=ENDPOINT_URL,
-        config=botocore.config.Config(s3={"addressing_style": "path"}),
-    )
-    return client
 
 
 @pytest.mark.skip()
