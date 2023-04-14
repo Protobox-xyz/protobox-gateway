@@ -1,9 +1,7 @@
 from uuid import uuid4
 
 import boto3
-import botocore.config
 import pytest
-from botocore.credentials import Credentials
 from botocore.exceptions import ClientError
 
 ENDPOINT_URL = "https://s3.protobox.xyz/api/"
