@@ -23,7 +23,7 @@ def get_owner_objects(bucket, owner, prefix=None, limit=1000, skip=0):
     yield from MONGODB.objects.find(query, {"_id": 0, "Content": 0}).skip(skip).limit(limit)
 
 
-@router.put("/{bucket}/{key}")
+@router.put("/{bucket}/{key:path}")
 async def create_object(
     bucket: str,
     key: str,
@@ -50,7 +50,7 @@ async def create_object(
     return Response(content=content, media_type="application/xml")
 
 
-@router.get("/{bucket}/{key}")
+@router.get("/{bucket}/{key:path}")
 async def get_object(
     bucket: str,
     key: str,
@@ -70,7 +70,7 @@ async def get_object(
     return Response(content=content, media_type="application/octet-stream")
 
 
-@router.head("/{bucket}/{key}")
+@router.head("/{bucket}/{key:path}")
 async def head_object(
     bucket: str,
     key: str,
@@ -87,7 +87,7 @@ async def head_object(
     return Response(status_code=404)
 
 
-@router.delete("/{bucket}/{key}")
+@router.delete("/{bucket}/{key:path}")
 async def delete_object(
     bucket: str,
     key: str,
