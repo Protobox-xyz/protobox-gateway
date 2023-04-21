@@ -4,7 +4,7 @@ import boto3
 import pytest
 from botocore.exceptions import ClientError
 
-ENDPOINT_URL = "https://s3.protobox.xyz/api/"
+ENDPOINT_URL = "https://s3.protobox.xyz/"
 BATCH_ID = "9f151ded49c44b529b98f42d7565002aa876b78298e4bccc39782c2ad709ccc7"
 
 
