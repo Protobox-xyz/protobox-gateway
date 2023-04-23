@@ -22,6 +22,7 @@ app.include_router(health_router)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     exc_str = f"{exc}".replace("\n", " ").replace("   ", " ")
     logging.error(f"{request}: {exc_str}")
+    logging.error(f"{request.headers}")
     content = {"message": "Validation Error", "errors": exc.errors()}
     return JSONResponse(content=content, status_code=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
