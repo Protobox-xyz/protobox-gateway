@@ -2,11 +2,12 @@ import logging
 from datetime import datetime
 
 from dicttoxml import dicttoxml
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, Depends
 from fastapi import Header
 from starlette.responses import Response
 
 from settings import MONGODB
+from utils.auth import extract_token
 
 router = APIRouter(prefix="", tags=["buckets"])
 
@@ -22,7 +23,7 @@ def get_owner_buckets(owner):
 # List all buckets
 @router.get("/")
 def list_buckets(
-    owner: str = Header(alias="x-amz-security-token"),
+    owner: str = Depends(extract_token),
 ):
     data = {"Owner": get_owner_data(owner), "Buckets": get_owner_buckets(owner)}
     content = dicttoxml(data, attr_type=False, custom_root="ListAllMyBucketsResult")
@@ -32,7 +33,7 @@ def list_buckets(
 @router.put("/{bucket}")
 def create_bucket(
     bucket: str,
-    owner: str = Header(alias="x-amz-security-token"),
+    owner: str = Depends(extract_token),
 ):
     logging.warning(f"Creating bucket {bucket}")
     MONGODB.buckets.insert_one({"_id": bucket, "Name": bucket, "Owner": owner, "CreationDate": datetime.now()})
@@ -43,7 +44,7 @@ def create_bucket(
 @router.delete("/{bucket}")
 def delete_bucket(
     bucket: str,
-    owner: str = Header(alias="x-amz-security-token"),
+    owner: str = Depends(extract_token),
 ):
     logging.warning(f"Deleting bucket {bucket}")
     MONGODB.buckets.delete_one(

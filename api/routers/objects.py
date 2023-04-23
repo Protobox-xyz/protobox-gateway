@@ -3,13 +3,14 @@ from datetime import datetime
 from xml.dom import minidom
 
 from dicttoxml import dicttoxml
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from fastapi import Header, Query
 from starlette.requests import Request
 from starlette.responses import Response
 from swarm_sdk.sdk import SwarmClient
 
 from settings import MONGODB, SWARM_SERVER_URL
+from utils.auth import extract_token
 
 router = APIRouter(prefix="", tags=["objects"])
 
@@ -28,7 +29,7 @@ async def create_object(
     bucket: str,
     key: str,
     request: Request,
-    owner: str = Header(alias="x-amz-security-token"),
+    owner: str = Depends(extract_token),
 ):
     logging.warning(f"Creating object {bucket}/{key}")
     content = await request.body()
@@ -54,7 +55,7 @@ async def create_object(
 async def get_object(
     bucket: str,
     key: str,
-    owner: str = Header(alias="x-amz-security-token"),
+    owner: str = Depends(extract_token),
 ):
     data = MONGODB.objects.find_one(
         {
@@ -74,7 +75,7 @@ async def get_object(
 async def head_object(
     bucket: str,
     key: str,
-    owner: str = Header(alias="x-amz-security-token"),
+    owner: str = Depends(extract_token),
 ):
     data = MONGODB.objects.find_one(
         {
@@ -91,7 +92,7 @@ async def head_object(
 async def delete_object(
     bucket: str,
     key: str,
-    owner: str = Header(alias="x-amz-security-token"),
+    owner: str = Depends(extract_token),
 ):
     # TODO: delete from swarm?
     MONGODB.objects.delete_one(
@@ -106,9 +107,8 @@ async def delete_object(
 @router.get("/{bucket}")
 async def list_objects(
     bucket: str,
-    request: Request,
     prefix: str = None,
-    owner: str = Header(alias="x-amz-security-token"),
+    owner: str = Depends(extract_token),
     max_keys: int = Query(alias="max-keys", default=1000),
     continuation_token: int = Query(alias="continuation-token", default=None),
 ):
