@@ -31,7 +31,6 @@ async def create_object(
     request: Request,
     owner: str = Depends(extract_token),
 ):
-    logging.warning(f"Creating object {bucket}/{key}")
     content = await request.body()
     content_type = request.headers.get("Content-Type")
     swarm_client = SwarmClient(batch_id=owner, server_url=SWARM_SERVER_URL)
