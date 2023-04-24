@@ -4,7 +4,7 @@ from xml.dom import minidom
 
 from dicttoxml import dicttoxml
 from fastapi import APIRouter, Depends
-from fastapi import Header, Query
+from fastapi import Query
 from starlette.requests import Request
 from starlette.responses import Response
 from swarm_sdk.sdk import SwarmClient
@@ -57,14 +57,8 @@ async def create_object(
 async def get_object(
     bucket: str,
     key: str,
-    owner: str = Depends(extract_token),
 ):
-    data = MONGODB.objects.find_one(
-        {
-            "_id": {"Bucket": bucket, "Key": key},
-            "Owner": owner,
-        }
-    )
+    data = MONGODB.objects.find_one({"_id": {"Bucket": bucket, "Key": key}})
     if not data:
         return Response(status_code=404)
     swarm_client = SwarmClient(server_url=data["SwarmData"]["SwarmServerUrl"])
@@ -77,17 +71,11 @@ async def get_object(
 async def head_object(
     bucket: str,
     key: str,
-    owner: str = Depends(extract_token),
 ):
-    data = MONGODB.objects.find_one(
-        {
-            "_id": {"Bucket": bucket, "Key": key},
-            "Owner": owner,
-        }
-    )
-    if data:
-        return Response(status_code=200)
-    return Response(status_code=404)
+    data = MONGODB.objects.find_one({"_id": {"Bucket": bucket, "Key": key}})
+    if not data:
+        return Response(status_code=404)
+    return Response(status_code=200)
 
 
 @router.delete("/{bucket}/{key:path}")
