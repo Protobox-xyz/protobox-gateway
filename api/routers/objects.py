@@ -36,7 +36,7 @@ async def create_object(
     swarm_client = SwarmClient(batch_id=owner, server_url=SWARM_SERVER_URL)
     swarm_upload_data = swarm_client.upload(content, content_type=content_type, name=key)
     swarm_upload_data["SwarmServerUrl"] = SWARM_SERVER_URL
-    logging.warning(swarm_upload_data)
+    logging.warning(f"SWARM reference: {swarm_upload_data['reference']}")
     MONGODB.objects.replace_one(
         {"_id": {"Bucket": bucket, "Key": key}},
         {
