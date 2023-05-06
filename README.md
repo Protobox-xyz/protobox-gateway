@@ -44,9 +44,7 @@ Protobox currently supports the following S3 API actions:
 
 ### Using AWS S3 SDK
 
-How to connect to SWARM using the S3 driver
-
-Below is an example of using AWS S3 SDK for Python to manage files in SWARM
+Below is an example of using [AWS S3 SDK for Python](https://github.com/Protobox-xyz/swarm-sdk) to manage files in Swarm.
 
 ~~~~
 import boto3
