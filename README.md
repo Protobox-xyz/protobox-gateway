@@ -84,7 +84,7 @@ return session.client(
 Please refer to our Gitbook for [additional resources](https://docs.protobox.xyz/resources/glossary)
 
 ## Team 👥
-[Maintainers](https://github.com/orgs/Protobox-xyz/people)
+[Contributors](https://github.com/Protobox-xyz/protobox-gateway/graphs/contributors)
 
 
 ### Contributions and Feedback 🖋️
