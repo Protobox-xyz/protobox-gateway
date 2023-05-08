@@ -5,6 +5,9 @@ Protobox is a decentralized storage product and suite of tools that allow existi
 The Protobox S3 API enables data transfer from S3 API-compatible storage endpoints/vendors to [Ethereum Swarm](https://github.com/ethersphere).
 
 # Contents 🔍
++ [Getting Started](https://github.com/Protobox-xyz/protobox-gateway/edit/main/README.md#getting-started)
+  + [Prerequisites](https://github.com/Protobox-xyz/protobox-gateway/edit/main/README.md#prerequisites)
+  + [Configuration and Installation](https://github.com/Protobox-xyz/protobox-gateway/edit/main/README.md#configuration-and-installation)
 + [S3 Compatible API](https://github.com/Protobox-xyz/protobox-gateway/edit/main/README.md#s3-compatible-api-)
   + [API Endpoint](https://github.com/Protobox-xyz/protobox-gateway/edit/main/README.md#api-endpoint)
   + [Supported API Actions](https://github.com/Protobox-xyz/protobox-gateway/edit/main/README.md#supported-api-actions)
@@ -17,17 +20,21 @@ The Protobox S3 API enables data transfer from S3 API-compatible storage endpoin
 
 📄 _An alternate form of our documentation can be found via our [Gitbook](https://docs.protobox.xyz/protobox-overview/what-is-protobox)_
 
+## Getting Started
 
-### Installation Requirements
+### Prerequisites
 + Docker (latest) with compose
 + MongoDB (latest)
 + Git
 
-### Getting started
+### Configuration and Installation
 + Clone the project on the desired swarm endpoint
 + Create a MongoDB instance for usage by the gateway
-+ Edit the docker-compose.yaml with details of your SSL certificats, mongoDB credentials, and swarm node location
-+ run "docker compose up"
++ Edit the docker-compose.yml with details of your SSL certificats, mongoDB credentials, and swarm node location
++ Run:
+~~~~
+docker compose up
+~~~~
 
 ## S3 Compatible API 🔌
 
