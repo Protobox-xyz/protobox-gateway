@@ -5,18 +5,18 @@ Protobox is a decentralized storage product and suite of tools that allow existi
 The Protobox S3 API enables data transfer from S3 API-compatible storage endpoints/vendors to [Ethereum Swarm](https://github.com/ethersphere).
 
 # Contents 🔍
-+ [Getting Started](https://github.com/Protobox-xyz/protobox-gateway/edit/main/README.md#getting-started)
-  + [Prerequisites](https://github.com/Protobox-xyz/protobox-gateway/edit/main/README.md#prerequisites)
-  + [Configuration and Installation](https://github.com/Protobox-xyz/protobox-gateway/edit/main/README.md#configuration-and-installation)
-+ [S3 Compatible API](https://github.com/Protobox-xyz/protobox-gateway/edit/main/README.md#s3-compatible-api-)
-  + [API Endpoint](https://github.com/Protobox-xyz/protobox-gateway/edit/main/README.md#api-endpoint)
-  + [Supported API Actions](https://github.com/Protobox-xyz/protobox-gateway/edit/main/README.md#supported-api-actions)
-  + [Using AWS S3 SDK](https://github.com/Protobox-xyz/protobox-gateway/edit/main/README.md#using-aws-s3-sdk)
-+ [Additional Resources](https://github.com/Protobox-xyz/protobox-gateway/edit/main/README.md#additional-resources-)
-+ [Team](https://github.com/Protobox-xyz/protobox-gateway/edit/main/README.md#team-)
-+ [Contributions/Feedback](https://github.com/Protobox-xyz/protobox-gateway/edit/main/README.md#contributions-and-feedback-%EF%B8%8F)
-+ [Show Your Support](https://github.com/Protobox-xyz/protobox-gateway/edit/main/README.md#show-your-support)
-+ [License](https://github.com/Protobox-xyz/protobox-gateway/edit/main/README.md#license-)
++ [Getting Started](https://github.com/Protobox-xyz/protobox-gateway#getting-started)
+  + [Prerequisites](https://github.com/Protobox-xyz/protobox-gateway#prerequisites)
+  + [Configuration and Installation](https://github.com/Protobox-xyz/protobox-gateway#configuration-and-installation)
++ [S3 Compatible API](https://github.com/Protobox-xyz/protobox-gateway#s3-compatible-api-)
+  + [API Endpoint](https://github.com/Protobox-xyz/protobox-gateway#api-endpoint)
+  + [Supported API Actions](https://github.com/Protobox-xyz/protobox-gateway#supported-api-actions)
+  + [Using AWS S3 SDK](https://github.com/Protobox-xyz/protobox-gateway#using-aws-s3-sdk)
++ [Additional Resources](https://github.com/Protobox-xyz/protobox-gateway#additional-resources-)
++ [Team](https://github.com/Protobox-xyz/protobox-gateway#team-)
++ [Contributions/Feedback](https://github.com/Protobox-xyz/protobox-gateway#contributions-and-feedback-%EF%B8%8F)
++ [Show Your Support](https://github.com/Protobox-xyz/protobox-gateway#show-your-support)
++ [License](https://github.com/Protobox-xyz/protobox-gateway#license-)
 
 📄 _An alternate form of our documentation can be found via our [Gitbook](https://docs.protobox.xyz/protobox-overview/what-is-protobox)_
 
