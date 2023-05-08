@@ -17,6 +17,18 @@ The Protobox S3 API enables data transfer from S3 API-compatible storage endpoin
 
 📄 _An alternate form of our documentation can be found via our [Gitbook](https://docs.protobox.xyz/protobox-overview/what-is-protobox)_
 
+
+### Installation Requirements
++ Docker (latest) with compose
++ MongoDB (latest)
++ Git
+
+### Getting started
++ Clone the project on the desired swarm endpoint
++ Create a MongoDB instance for usage by the gateway
++ Edit the docker-compose.yaml with details of your SSL certificats, mongoDB credentials, and swarm node location
++ run "docker compose up"
+
 ## S3 Compatible API 🔌
 
 ### API Endpoint
