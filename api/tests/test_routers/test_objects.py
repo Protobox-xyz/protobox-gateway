@@ -14,7 +14,7 @@ def test_object_creation(api, mocker):
     key = "test.txt"
     headers = {**HEADERS, "Content-Type": "test/plain"}
     with open("tests/data/text_file.txt", "rb") as f:
-        response = api.put(f"http://0.0.0.0:8000/api/{bucket}/{key}", data=f.read(), headers=headers)
+        response = api.put(f"/{bucket}/{key}", data=f.read(), headers=headers)
     assert response.is_success
     # convert xml to dict
     # data = xmltodict.parse(response.content)
@@ -44,10 +44,10 @@ def test_read_object(api, mocker):
     with open("tests/data/text_file.txt", "rb") as f:
         swarm_client_instance.download.side_effect = [f.read()]
 
-    response = api.get(f"http://0.0.0.0:8000/api/{bucket}/{key}_0", headers=HEADERS)
+    response = api.get(f"/{bucket}/{key}_0", headers=HEADERS)
     assert response.is_error
 
-    response = api.get(f"http://0.0.0.0:8000/api/{bucket}/{key}", headers=HEADERS)
+    response = api.get(f"/{bucket}/{key}", headers=HEADERS)
     assert response.is_success
     with open("tests/data/text_file.txt", "rb") as f:
         assert f.read() == response.content
@@ -65,7 +65,7 @@ def test_delete_object(api):
         }
     )
 
-    response = api.delete(f"http://0.0.0.0:8000/api/{bucket}/{key}", headers=HEADERS)
+    response = api.delete(f"/{bucket}/{key}", headers=HEADERS)
     assert response.is_success
     assert MONGODB.objects.find_one({"_id": {"Bucket": bucket, "Key": key}, "Owner": TOKEN}) is None
 
@@ -82,10 +82,10 @@ def test_head_object(api):
         }
     )
 
-    response = api.head(f"http://0.0.0.0:8000/api/{bucket}/{key}", headers=HEADERS)
+    response = api.head(f"/{bucket}/{key}", headers=HEADERS)
     assert response.is_success
 
-    response = api.head(f"http://0.0.0.0:8000/api/{bucket}/{key}_1", headers=HEADERS)
+    response = api.head(f"/{bucket}/{key}_1", headers=HEADERS)
     assert response.is_error
 
 
@@ -102,12 +102,12 @@ def test_list_object(api):
             }
         )
 
-    response = api.get(f"http://0.0.0.0:8000/api/{bucket}", headers=HEADERS)
+    response = api.get(f"/{bucket}", headers=HEADERS)
     assert response.is_success
     data = xmltodict.parse(response.content)
     assert len(data["ListBucketResult"]["Contents"]) == 3
 
-    response = api.get(f"http://0.0.0.0:8000/api/{bucket}", params={"prefix": "0_"}, headers=HEADERS)
+    response = api.get(f"/{bucket}", params={"prefix": "0_"}, headers=HEADERS)
     assert response.is_success
     data = xmltodict.parse(response.content)
     # data.ListBucketResult.Contents should be list, but it is parsed as dict,

@@ -6,7 +6,7 @@ from tests.conftest import HEADERS, TOKEN
 
 
 def test_list_buckets_api_wo_token(api):
-    response = api.get("http://0.0.0.0:8000/api/")
+    response = api.get("/")
     assert response.status_code == 422
     data = response.json()
     assert data["detail"][0]["loc"] == ["header", "x-amz-security-token"]
@@ -14,7 +14,7 @@ def test_list_buckets_api_wo_token(api):
 
 
 def test_list_buckets_api(api):
-    response = api.get("http://0.0.0.0:8000/api/", headers=HEADERS)
+    response = api.get("/", headers=HEADERS)
     assert response.is_success
     # convert xml to dict
     data = xmltodict.parse(response.content)
@@ -32,11 +32,11 @@ def test_list_buckets_api_and_create_bucket(api):
 
     # create bucket
     bucket_name = "test"
-    response = api.put(f"http://0.0.0.0:8000/api/{bucket_name}/", headers=HEADERS)
+    response = api.put(f"/{bucket_name}/", headers=HEADERS)
     assert response.is_success
 
     # list buckets
-    response = api.get("http://0.0.0.0:8000/api/", headers=HEADERS)
+    response = api.get("/", headers=HEADERS)
     assert response.is_success
     # convert xml to dict
     data = xmltodict.parse(response.content)
@@ -49,11 +49,11 @@ def test_create_bucket_and_delete_bucket(api):
     # create bucket
 
     for i in range(3):
-        response = api.put(f"http://0.0.0.0:8000/api/test_{i}/", headers=HEADERS)
+        response = api.put(f"/test_{i}/", headers=HEADERS)
         assert response.is_success
 
     # list buckets
-    response = api.get("http://0.0.0.0:8000/api/", headers=HEADERS)
+    response = api.get("/", headers=HEADERS)
     assert response.is_success
     # convert xml to dict
     data = xmltodict.parse(response.content)
@@ -61,11 +61,11 @@ def test_create_bucket_and_delete_bucket(api):
     assert data["ListAllMyBucketsResult"]["Buckets"] is not None
     assert len(data["ListAllMyBucketsResult"]["Buckets"]["item"]) == 3
 
-    response = api.delete(f"http://0.0.0.0:8000/api/test_0/", headers=HEADERS)
+    response = api.delete(f"/test_0/", headers=HEADERS)
     assert response.is_success
 
     # list buckets
-    response = api.get("http://0.0.0.0:8000/api/", headers=HEADERS)
+    response = api.get("/", headers=HEADERS)
     assert response.is_success
     # convert xml to dict
     data = xmltodict.parse(response.content)
