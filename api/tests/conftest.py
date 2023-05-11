@@ -1,3 +1,6 @@
+import uuid
+from unittest.mock import patch
+
 import mongomock
 import pytest
 from starlette.testclient import TestClient
@@ -24,3 +27,17 @@ def clear_db_before_tests():
     settings.MONGODB.objects.delete_many({})
     settings.MONGODB.buckets.delete_many({})
     yield
+
+
+class MockedSwarmClient:
+    def __init__(self, *args, **kwargs):
+        ...
+
+    def upload(self, *args, **kwargs):
+        return {"reference": uuid.uuid4().hex}
+
+
+@pytest.fixture(autouse=True)
+def mock_swarm_client():
+    with patch("routers.objects.SwarmClient", new=MockedSwarmClient):
+        yield

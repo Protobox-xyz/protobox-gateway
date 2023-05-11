@@ -13,9 +13,9 @@ from routers.health import router as health_router
 
 app = FastAPI(title="Protobox API", docs_url="/api/docs", openapi_url="/api/openapi.json", redoc_url="/api/redoc")
 
+app.include_router(health_router)
 app.include_router(buckets_router)
 app.include_router(objects_router)
-app.include_router(health_router)
 
 
 @app.exception_handler(RequestValidationError)

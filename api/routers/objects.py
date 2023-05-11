@@ -1,4 +1,3 @@
-import logging
 from datetime import datetime
 from xml.dom import minidom
 
@@ -36,7 +35,6 @@ async def create_object(
     swarm_client = SwarmClient(batch_id=owner, server_url=SWARM_SERVER_URL)
     swarm_upload_data = swarm_client.upload(content, content_type=content_type, name=key)
     swarm_upload_data["SwarmServerUrl"] = SWARM_SERVER_URL
-    logging.warning(f"SWARM reference: {swarm_upload_data['reference']}")
     MONGODB.objects.replace_one(
         {"_id": {"Bucket": bucket, "Key": key}},
         {
@@ -84,7 +82,6 @@ async def delete_object(
     key: str,
     owner: str = Depends(extract_token),
 ):
-    # TODO: delete from swarm?
     MONGODB.objects.delete_one(
         {
             "_id": {"Bucket": bucket, "Key": key},
