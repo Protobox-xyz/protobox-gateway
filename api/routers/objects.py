@@ -1,6 +1,5 @@
 from datetime import datetime
 from xml.dom import minidom
-
 from dicttoxml import dicttoxml
 from fastapi import APIRouter, Depends
 from fastapi import Query
@@ -25,16 +24,19 @@ def get_owner_objects(bucket, owner, prefix=None, limit=1000, skip=0):
 
 @router.put("/{bucket}/{key:path}")
 async def create_object(
-    bucket: str,
-    key: str,
-    request: Request,
-    owner: str = Depends(extract_token),
+        bucket: str,
+        key: str,
+        request: Request,
+        owner: str = Depends(extract_token),
 ):
-    content = await request.body()
+
     content_type = request.headers.get("Content-Type")
     swarm_client = SwarmClient(batch_id=owner, server_url=SWARM_SERVER_URL)
-    swarm_upload_data = swarm_client.upload(content, content_type=content_type, name=key)
+    swarm_upload_data = await swarm_client.upload(request.stream(), content_type=content_type, name=key)
     swarm_upload_data["SwarmServerUrl"] = SWARM_SERVER_URL
+
+    print(swarm_upload_data)
+
     MONGODB.objects.replace_one(
         {"_id": {"Bucket": bucket, "Key": key}},
         {
@@ -53,22 +55,21 @@ async def create_object(
 
 @router.get("/{bucket}/{key:path}")
 async def get_object(
-    bucket: str,
-    key: str,
+        bucket: str,
+        key: str,
 ):
     data = MONGODB.objects.find_one({"_id": {"Bucket": bucket, "Key": key}})
     if not data:
         return Response(status_code=404)
     swarm_client = SwarmClient(server_url=data["SwarmData"]["SwarmServerUrl"])
-    content = swarm_client.download(data["SwarmData"]["reference"])
-
-    return Response(content=content, media_type="application/octet-stream")
+    content, content_type = await swarm_client.download(data["SwarmData"]["reference"])
+    return Response(content=content, media_type=content_type)
 
 
 @router.head("/{bucket}/{key:path}")
 async def head_object(
-    bucket: str,
-    key: str,
+        bucket: str,
+        key: str,
 ):
     data = MONGODB.objects.find_one({"_id": {"Bucket": bucket, "Key": key}})
     if not data:
@@ -78,9 +79,9 @@ async def head_object(
 
 @router.delete("/{bucket}/{key:path}")
 async def delete_object(
-    bucket: str,
-    key: str,
-    owner: str = Depends(extract_token),
+        bucket: str,
+        key: str,
+        owner: str = Depends(extract_token),
 ):
     MONGODB.objects.delete_one(
         {
@@ -93,11 +94,11 @@ async def delete_object(
 
 @router.get("/{bucket}")
 async def list_objects(
-    bucket: str,
-    prefix: str = None,
-    owner: str = Depends(extract_token),
-    max_keys: int = Query(alias="max-keys", default=1000),
-    continuation_token: int = Query(alias="continuation-token", default=None),
+        bucket: str,
+        prefix: str = None,
+        owner: str = Depends(extract_token),
+        max_keys: int = Query(alias="max-keys", default=1000),
+        continuation_token: int = Query(alias="continuation-token", default=None),
 ):
     continuation_token = continuation_token or 0
     data = get_owner_objects(bucket, owner, prefix=prefix, limit=max_keys, skip=continuation_token)
