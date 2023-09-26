@@ -12,13 +12,9 @@ services:
       context: ./api
     networks:
       - protobox-gateway-network
-    volumes:
-      - ./api:/app
     depends_on:
       - mongo
     restart: unless-stopped
-    ports:
-      - "8000:8000"
     environment:
       - MONGODB_CONNECTION_STRING=${MONGODB_CONNECTION_STRING:-mongodb://localhost:27017/}
       - SWARM_SERVER_URL=${SWARM_SERVER_URL:-http://localhost:1633/}
