@@ -14,6 +14,7 @@ class SwarmClient:
         if not url.endswith("/bzz"):
             url = urljoin(url, "bzz")
         return url
+
     async def download(self, file_id: str):
         file_url = f"{self.generate_api_url()}/{file_id}/"
         async with aiohttp.ClientSession() as session:
