@@ -8,6 +8,7 @@ import xmltodict
 
 from routers.objects import MONGODB
 from tests.conftest import HEADERS, TOKEN
+from tests.test_utils.async_generator import AsyncIterator
 
 
 @pytest.mark.asyncio
@@ -30,20 +31,6 @@ def test_object_creation(api, mocker):
     assert obj is not None
     assert obj["Key"] == key
     assert obj["Owner"] == TOKEN
-
-
-class AsyncIterator:
-    def __init__(self, seq):
-        self.iter = iter(seq)
-
-    def __aiter__(self):
-        return self
-
-    async def __anext__(self):
-        try:
-            return next(self.iter)
-        except StopIteration:
-            raise StopAsyncIteration
 
 
 def test_read_object(api, mocker):

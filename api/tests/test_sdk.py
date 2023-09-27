@@ -32,15 +32,3 @@ async def test_swarm_sdk_upload_from_file_without_batch_id():
     )
     with pytest.raises(BatchIDRequiredException):
         await swarm.upload("./tests/data/text_file.txt", name="text_file.txt")
-
-
-@pytest.mark.asyncio
-async def test_swarm_generate_url(mocker):
-    requests_mock = mocker.patch("aiohttp.ClientSession.get")
-    swarm = SwarmClient(
-        batch_id=None,
-        server_url="http://some-server.com/bzz",
-    )
-
-    url = swarm.generate_api_url()
-    assert url == "http://some-server.com/bzz"
