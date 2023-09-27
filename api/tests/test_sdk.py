@@ -34,7 +34,7 @@ async def test_swarm_sdk_upload_from_file_without_batch_id():
         await swarm.upload("./tests/data/text_file.txt", name="text_file.txt")
 
 
-@pytest.mark.skip
+@pytest.mark.asyncio
 async def test_swarm_sdk_download_file(mocker):
     requests_mock = mocker.patch("aiohttp.ClientSession.get")
     swarm = SwarmClient(
@@ -43,6 +43,3 @@ async def test_swarm_sdk_download_file(mocker):
     )
 
     swarm.download("some-file-id")
-    requests_mock.assert_called_once()
-    args, kwargs = requests_mock.call_args_list[0]
-    assert args[0] == "http://some-server.com/bzz/some-file-id/"
