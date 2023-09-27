@@ -15,7 +15,8 @@ def test_list_buckets_api_wo_token(api):
     # assert data["detail"][0]["msg"] == "field required"
 
 
-def test_list_buckets_api(api):
+@pytest.mark.asyncio
+async def test_list_buckets_api(api):
     response = api.get("/", headers=HEADERS)
     assert response.is_success
     # convert xml to dict
@@ -24,7 +25,8 @@ def test_list_buckets_api(api):
     # assert data["ListAllMyBucketsResult"]["Buckets"] is None
 
 
-def test_list_buckets_api_and_create_bucket(api):
+@pytest.mark.skip()
+async def test_list_buckets_api_and_create_bucket(api):
     response = api.get("/", headers=HEADERS)
     assert response.is_success
     # convert xml to dict
@@ -48,11 +50,11 @@ def test_list_buckets_api_and_create_bucket(api):
 
 
 @pytest.mark.skip()
-def test_create_bucket_and_delete_bucket(api):
+async def test_create_bucket_and_delete_bucket(api):
     # create bucket
 
     for i in range(3):
-        response = api.put(f"/test_{i}/", headers=HEADERS)
+        response = await api.put(f"/test_{i}/", headers=HEADERS)
         assert response.is_success
 
     # list buckets

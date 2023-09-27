@@ -1,3 +1,7 @@
+import os
+
+import asyncio
+import pytest
 from datetime import datetime
 
 import xmltodict
@@ -6,14 +10,18 @@ from routers.objects import MONGODB
 from tests.conftest import HEADERS, TOKEN
 
 
+@pytest.mark.asyncio
 def test_object_creation(api, mocker):
     swarm_client = mocker.patch("routers.objects.SwarmClient")
     swarm_client_instance = swarm_client.return_value
-    swarm_client_instance.upload.side_effect = [{"hash": "test"}]
+    f = asyncio.Future()
+    f.set_result({"hash": "test"})
+    swarm_client_instance.upload.return_value = f
+
     bucket = "test"
     key = "test.txt"
     headers = {**HEADERS, "Content-Type": "test/plain"}
-    with open("tests/data/text_file.txt", "rb") as f:
+    with open("../data/text_file.txt", "rb") as f:
         response = api.put(f"/{bucket}/{key}", data=f.read(), headers=headers)
     assert response.is_success
     # convert xml to dict
@@ -41,15 +49,17 @@ def test_read_object(api, mocker):
 
     swarm_client = mocker.patch("routers.objects.SwarmClient")
     swarm_client_instance = swarm_client.return_value
-    with open("tests/data/text_file.txt", "rb") as f:
-        swarm_client_instance.download.side_effect = [f.read()]
+    with open("../data/text_file.txt", "rb") as f:
+        result = asyncio.Future()
+        result.set_result((f.read(), "text/plain"))
+        swarm_client_instance.download.return_value = result
 
     response = api.get(f"/{bucket}/{key}_0", headers=HEADERS)
     assert response.is_error
 
     response = api.get(f"/{bucket}/{key}", headers=HEADERS)
     assert response.is_success
-    with open("tests/data/text_file.txt", "rb") as f:
+    with open("../data/text_file.txt", "rb") as f:
         assert f.read() == response.content
 
 
