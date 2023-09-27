@@ -21,7 +21,7 @@ def test_object_creation(api, mocker):
     bucket = "test"
     key = "test.txt"
     headers = {**HEADERS, "Content-Type": "test/plain"}
-    with open("/data/text_file.txt", "rb") as f:
+    with open("tests/data/text_file.txt", "rb") as f:
         response = api.put(f"/{bucket}/{key}", data=f.read(), headers=headers)
     assert response.is_success
     # convert xml to dict
@@ -49,7 +49,7 @@ def test_read_object(api, mocker):
 
     swarm_client = mocker.patch("routers.objects.SwarmClient")
     swarm_client_instance = swarm_client.return_value
-    with open("/data/text_file.txt", "rb") as f:
+    with open("tests/data/text_file.txt", "rb") as f:
         result = asyncio.Future()
         result.set_result((f.read(), "text/plain"))
         swarm_client_instance.download.return_value = result
@@ -59,7 +59,7 @@ def test_read_object(api, mocker):
 
     response = api.get(f"/{bucket}/{key}", headers=HEADERS)
     assert response.is_success
-    with open("/data/text_file.txt", "rb") as f:
+    with open("tests/data/text_file.txt", "rb") as f:
         assert f.read() == response.content
 
 
