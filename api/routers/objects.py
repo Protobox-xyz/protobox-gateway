@@ -24,12 +24,11 @@ def get_owner_objects(bucket, owner, prefix=None, limit=1000, skip=0):
 
 @router.put("/{bucket}/{key:path}")
 async def create_object(
-        bucket: str,
-        key: str,
-        request: Request,
-        owner: str = Depends(extract_token),
+    bucket: str,
+    key: str,
+    request: Request,
+    owner: str = Depends(extract_token),
 ):
-
     content_type = request.headers.get("Content-Type")
     swarm_client = SwarmClient(batch_id=owner, server_url=SWARM_SERVER_URL)
     swarm_upload_data = await swarm_client.upload(request.stream(), content_type=content_type, name=key)
@@ -55,8 +54,8 @@ async def create_object(
 
 @router.get("/{bucket}/{key:path}")
 async def get_object(
-        bucket: str,
-        key: str,
+    bucket: str,
+    key: str,
 ):
     data = MONGODB.objects.find_one({"_id": {"Bucket": bucket, "Key": key}})
     if not data:
@@ -68,8 +67,8 @@ async def get_object(
 
 @router.head("/{bucket}/{key:path}")
 async def head_object(
-        bucket: str,
-        key: str,
+    bucket: str,
+    key: str,
 ):
     data = MONGODB.objects.find_one({"_id": {"Bucket": bucket, "Key": key}})
     if not data:
@@ -79,9 +78,9 @@ async def head_object(
 
 @router.delete("/{bucket}/{key:path}")
 async def delete_object(
-        bucket: str,
-        key: str,
-        owner: str = Depends(extract_token),
+    bucket: str,
+    key: str,
+    owner: str = Depends(extract_token),
 ):
     MONGODB.objects.delete_one(
         {
@@ -94,11 +93,11 @@ async def delete_object(
 
 @router.get("/{bucket}")
 async def list_objects(
-        bucket: str,
-        prefix: str = None,
-        owner: str = Depends(extract_token),
-        max_keys: int = Query(alias="max-keys", default=1000),
-        continuation_token: int = Query(alias="continuation-token", default=None),
+    bucket: str,
+    prefix: str = None,
+    owner: str = Depends(extract_token),
+    max_keys: int = Query(alias="max-keys", default=1000),
+    continuation_token: int = Query(alias="continuation-token", default=None),
 ):
     continuation_token = continuation_token or 0
     data = get_owner_objects(bucket, owner, prefix=prefix, limit=max_keys, skip=continuation_token)
@@ -117,4 +116,5 @@ async def list_objects(
         xml.appendChild(root.createElement("ContinuationToken")).appendChild(
             root.createTextNode(continuation_token + counter)
         )
+
     return Response(content=root.toprettyxml(), media_type="application/octet-stream")
