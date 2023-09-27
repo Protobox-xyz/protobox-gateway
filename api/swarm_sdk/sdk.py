@@ -18,8 +18,8 @@ class SwarmClient:
         file_url = f"{self.generate_api_url()}/{file_id}/"
         async with aiohttp.ClientSession() as session:
             async with session.get(file_url) as response:
-                response.raise_for_status()
-                return await response.content.read(), response.content_type
+                async for ln in response.content.iter_chunked(1024):
+                    yield ln
 
     async def upload(self, stream: any, name: str = None, content_type: str = None):
         if not self.batch_id:

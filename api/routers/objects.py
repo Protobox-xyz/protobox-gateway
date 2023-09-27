@@ -4,7 +4,7 @@ from dicttoxml import dicttoxml
 from fastapi import APIRouter, Depends
 from fastapi import Query
 from starlette.requests import Request
-from starlette.responses import Response
+from starlette.responses import Response, StreamingResponse
 from swarm_sdk.sdk import SwarmClient
 
 from settings import MONGODB, SWARM_SERVER_URL
@@ -61,8 +61,9 @@ async def get_object(
     if not data:
         return Response(status_code=404)
     swarm_client = SwarmClient(server_url=data["SwarmData"]["SwarmServerUrl"])
-    content, content_type = await swarm_client.download(data["SwarmData"]["reference"])
-    return Response(content=content, media_type=content_type)
+    stream_content = swarm_client.download(data["SwarmData"]["reference"])
+
+    return StreamingResponse(content=stream_content)
 
 
 @router.head("/{bucket}/{key:path}")
