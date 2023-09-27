@@ -1,3 +1,5 @@
+import asyncio
+
 import aiohttp
 from urllib.parse import urljoin
 from swarm_sdk.exceptions import BatchIDRequiredException
@@ -20,6 +22,7 @@ class SwarmClient:
             async with session.get(file_url) as response:
                 async for ln in response.content.iter_chunked(1024):
                     yield ln
+                    await asyncio.sleep(0)
 
     async def upload(self, stream: any, name: str = None, content_type: str = None):
         if not self.batch_id:
