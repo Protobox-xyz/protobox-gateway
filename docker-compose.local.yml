@@ -24,13 +24,36 @@ services:
     networks:
       - protobox-gateway-network
     volumes:
-        - /home/bee/.bee:/home/bee/.bee
+        - ./bee/.bee:/home/bee/.bee
     ports:
       - "1633:1633"
       - "1634:1634"
       - "1635:1635"
     command:
       - "start"
+      - "--welcome-message='Bzzzz bzzz bzz bzz. 🐝'"
+      - '--blockchain-rpc-endpoint=https://muddy-dry-darkness.xdai.discover.quiknode.pro/13e54c30c96182a3fc65088ff47f7a3fc3231585/'
+      - "--debug-api-enable"
+      - "--full-node"
+      - "--swap-initial-deposit=0"
+      - "--tracing-enable"
+      - "--network-id=1"
+      - "--password=123"
+      - "--mainnet"
+  fair_os:
+    image: fairdatasociety/fairos-dfs
+    container_name: protobox-fair-dfs
+    depends_on:
+      - bee
+    networks:
+      - protobox-gateway-network
+    ports:
+      - "9090:9090"
+    command:
+      - "server"
+      - "--rpc=https://fabled-soft-night.ethereum-sepolia.discover.quiknode.pro/7344d1fa27d12b5da5d0834e0ee2216ea97362b5/"
+      - "--beeApi=http://bee:1633"
+      - "--postageBlockId=0000000000000000000000000000000000000000000000000000000000000000"
   mongo:
     container_name: protobox-gateway-mongo
     image: mongo

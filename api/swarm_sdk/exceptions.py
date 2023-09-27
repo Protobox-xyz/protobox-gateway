@@ -1,0 +1,2 @@
+class BatchIDRequiredException(Exception):
+    pass

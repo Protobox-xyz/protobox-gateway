@@ -2,4 +2,6 @@ fastapi[all]==0.94.0
 dicttoxml==1.7.16
 pymongo==4.3.3
 requests==2.28.1
-git+https://github.com/Protobox-xyz/swarm-sdk.git
+websocket-client==1.6.1
+aiohttp==3.8.4
+pytest-asyncio==0.21.1

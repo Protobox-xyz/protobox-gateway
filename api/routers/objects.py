@@ -1,11 +1,10 @@
 from datetime import datetime
 from xml.dom import minidom
-
 from dicttoxml import dicttoxml
 from fastapi import APIRouter, Depends
 from fastapi import Query
 from starlette.requests import Request
-from starlette.responses import Response
+from starlette.responses import Response, StreamingResponse
 from swarm_sdk.sdk import SwarmClient
 
 from settings import MONGODB, SWARM_SERVER_URL
@@ -30,11 +29,13 @@ async def create_object(
     request: Request,
     owner: str = Depends(extract_token),
 ):
-    content = await request.body()
     content_type = request.headers.get("Content-Type")
     swarm_client = SwarmClient(batch_id=owner, server_url=SWARM_SERVER_URL)
-    swarm_upload_data = swarm_client.upload(content, content_type=content_type, name=key)
+    swarm_upload_data = await swarm_client.upload(request.stream(), content_type=content_type, name=key)
     swarm_upload_data["SwarmServerUrl"] = SWARM_SERVER_URL
+
+    print(swarm_upload_data)
+
     MONGODB.objects.replace_one(
         {"_id": {"Bucket": bucket, "Key": key}},
         {
@@ -60,9 +61,9 @@ async def get_object(
     if not data:
         return Response(status_code=404)
     swarm_client = SwarmClient(server_url=data["SwarmData"]["SwarmServerUrl"])
-    content = swarm_client.download(data["SwarmData"]["reference"])
+    stream_content = swarm_client.download(data["SwarmData"]["reference"])
 
-    return Response(content=content, media_type="application/octet-stream")
+    return StreamingResponse(content=stream_content)
 
 
 @router.head("/{bucket}/{key:path}")
@@ -116,4 +117,5 @@ async def list_objects(
         xml.appendChild(root.createElement("ContinuationToken")).appendChild(
             root.createTextNode(continuation_token + counter)
         )
+
     return Response(content=root.toprettyxml(), media_type="application/octet-stream")

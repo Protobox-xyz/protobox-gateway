@@ -1,15 +1,24 @@
+import os
+
+import asyncio
+import pytest
 from datetime import datetime
 
 import xmltodict
 
 from routers.objects import MONGODB
 from tests.conftest import HEADERS, TOKEN
+from tests.test_utils.async_generator import AsyncIterator
 
 
+@pytest.mark.asyncio
 def test_object_creation(api, mocker):
     swarm_client = mocker.patch("routers.objects.SwarmClient")
     swarm_client_instance = swarm_client.return_value
-    swarm_client_instance.upload.side_effect = [{"hash": "test"}]
+    f = asyncio.Future()
+    f.set_result({"hash": "test"})
+    swarm_client_instance.upload.return_value = f
+
     bucket = "test"
     key = "test.txt"
     headers = {**HEADERS, "Content-Type": "test/plain"}
@@ -42,7 +51,7 @@ def test_read_object(api, mocker):
     swarm_client = mocker.patch("routers.objects.SwarmClient")
     swarm_client_instance = swarm_client.return_value
     with open("tests/data/text_file.txt", "rb") as f:
-        swarm_client_instance.download.side_effect = [f.read()]
+        swarm_client_instance.download.return_value = AsyncIterator(f.readlines())
 
     response = api.get(f"/{bucket}/{key}_0", headers=HEADERS)
     assert response.is_error
