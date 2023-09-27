@@ -32,6 +32,20 @@ def test_object_creation(api, mocker):
     assert obj["Owner"] == TOKEN
 
 
+class AsyncIterator:
+    def __init__(self, seq):
+        self.iter = iter(seq)
+
+    def __aiter__(self):
+        return self
+
+    async def __anext__(self):
+        try:
+            return next(self.iter)
+        except StopIteration:
+            raise StopAsyncIteration
+
+
 def test_read_object(api, mocker):
     bucket = "test"
     key = "test.txt"
@@ -50,9 +64,7 @@ def test_read_object(api, mocker):
     swarm_client = mocker.patch("routers.objects.SwarmClient")
     swarm_client_instance = swarm_client.return_value
     with open("tests/data/text_file.txt", "rb") as f:
-        result = asyncio.Future()
-        result.set_result((f.read(), "text/plain"))
-        swarm_client_instance.download.return_value = result
+        swarm_client_instance.download.return_value = AsyncIterator(f.readlines())
 
     response = api.get(f"/{bucket}/{key}_0", headers=HEADERS)
     assert response.is_error
