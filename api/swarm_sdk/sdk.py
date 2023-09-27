@@ -1,4 +1,3 @@
-import typing
 import aiohttp
 from urllib.parse import urljoin
 from swarm_sdk.exceptions import BatchIDRequiredException
@@ -22,7 +21,7 @@ class SwarmClient:
                 response.raise_for_status()
                 return await response.content.read(), response.content_type
 
-    async def upload(self, stream: typing.AsyncGenerator, name: str = None, content_type: str = None):
+    async def upload(self, stream: any, name: str = None, content_type: str = None):
         if not self.batch_id:
             raise BatchIDRequiredException("Batch ID is required for uploading files")
 
