@@ -9,7 +9,7 @@ from service.bucket_service import create_bucket, get_owner_objects
 from settings import MONGODB
 from utils.auth import extract_token
 
-router = APIRouter(prefix="/api/json/buckets", tags=["objects-json"])
+router = APIRouter(prefix="/api/json/objects", tags=["objects-json"])
 
 
 @router.put("/{bucket}/{key:path}", status_code=201)
