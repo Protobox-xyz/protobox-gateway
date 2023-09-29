@@ -38,3 +38,11 @@ def get_owner_objects(bucket, owner, prefix=None, limit=1000, skip=0):
     if prefix:
         query["Key"] = {"$regex": f"^{prefix}"}
     yield from MONGODB.objects.find(query, {"_id": 0, "Content": 0}).skip(skip).limit(limit)
+
+
+def get_owner_data(owner):
+    return {"ID": owner, "DisplayName": owner}
+
+
+def get_owner_buckets(owner):
+    yield from MONGODB.buckets.find({"Owner": owner})
