@@ -10,9 +10,11 @@ from starlette.responses import JSONResponse
 from routers.buckets import router as buckets_router
 from routers.objects import router as objects_router
 from routers.health import router as health_router
+from routers.objects_json import router as objects_json_router
 
 app = FastAPI(title="Protobox API", docs_url="/api/docs", openapi_url="/api/openapi.json", redoc_url="/api/redoc")
 
+app.include_router(objects_json_router)
 app.include_router(health_router)
 app.include_router(buckets_router)
 app.include_router(objects_router)
