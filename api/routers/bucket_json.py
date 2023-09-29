@@ -8,7 +8,7 @@ from service.bucket_service import get_owner_data, get_owner_buckets
 from settings import MONGODB
 from utils.auth import extract_token
 
-router = APIRouter(prefix="/api/json/object", tags=["buckets-json"])
+router = APIRouter(prefix="/api/json/objects", tags=["buckets-json"])
 
 
 # List all buckets
