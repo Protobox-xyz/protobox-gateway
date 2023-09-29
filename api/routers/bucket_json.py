@@ -12,7 +12,7 @@ router = APIRouter(prefix="/api/json/buckets", tags=["buckets-json"])
 
 
 # List all buckets
-@router.get("/", response_model=list[dict])
+@router.get("/", response_model=dict)
 def list_buckets(
     owner: str = Depends(extract_token),
 ):
