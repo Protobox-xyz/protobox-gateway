@@ -1,7 +1,16 @@
+import logging
 from datetime import datetime
 from starlette.requests import Request
 from swarm_sdk.sdk import SwarmClient
-from settings import MONGODB, SWARM_SERVER_URL
+from settings import MONGODB, SWARM_SERVER_URL_BZZ, SWARM_SERVER_URL_STAMP
+from hexbytes import HexBytes
+from eth_account.messages import encode_defunct
+from web3 import Web3
+from fastapi import HTTPException
+
+from models.batches_router import BatchResponse
+
+WEB3 = Web3()
 
 
 async def create_bucket(
@@ -11,9 +20,9 @@ async def create_bucket(
     owner: str,
 ):
     content_type = request.headers.get("Content-Type")
-    swarm_client = SwarmClient(batch_id=owner, server_url=SWARM_SERVER_URL)
+    swarm_client = SwarmClient(batch_id=owner, server_url=SWARM_SERVER_URL_BZZ)
     swarm_upload_data = await swarm_client.upload(request.stream(), content_type=content_type, name=key)
-    swarm_upload_data["SwarmServerUrl"] = SWARM_SERVER_URL
+    swarm_upload_data["SwarmServerUrl"] = SWARM_SERVER_URL_BZZ
 
     print(swarm_upload_data)
 
@@ -46,3 +55,38 @@ def get_owner_data(owner):
 
 def get_owner_buckets(owner):
     yield from MONGODB.buckets.find({"Owner": owner})
+
+
+def verify_signature(signature: str) -> (bool, str):
+    if signature is None:
+        return False, None
+    try:
+        encoded_message = encode_defunct(text="create batch")
+        address = WEB3.eth.account.recover_message(encoded_message, signature=HexBytes(signature))
+    except Exception as e:
+        logging.error(e)
+        return False, None
+    return True, address
+
+
+async def create_batch(signature: str):
+    verify, owner = verify_signature(signature)
+
+    logging.info(f"creating batch with owner {owner}")
+
+    if not verify:
+        raise HTTPException(status_code=400, detail="invalid signature")
+
+    amount = 100000000
+    depth = 20
+
+    swarm_client = SwarmClient(batch_id=owner, server_url=SWARM_SERVER_URL_STAMP)
+    swarm_upload_data = await swarm_client.create_batch(amount=amount, depth=depth)
+
+    logging.info(f"created swarm batch id {swarm_upload_data}")
+
+    batch_id = swarm_upload_data["batchID"]
+
+    MONGODB.batches.insert_one({"_id": batch_id, "owner": owner, "batch_id": batch_id})
+
+    return BatchResponse(batch_id=batch_id, owner=owner, _id=batch_id)
