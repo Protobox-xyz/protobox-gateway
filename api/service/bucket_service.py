@@ -77,6 +77,7 @@ async def create_batch(signature: str):
     if not verify:
         raise HTTPException(status_code=400, detail="invalid signature")
 
+    # in future this two var should be changed
     amount = 100000000
     depth = 20
 
