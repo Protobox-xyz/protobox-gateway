@@ -1,7 +1,6 @@
 import logging
 from datetime import datetime
 
-from dicttoxml import dicttoxml
 from fastapi import APIRouter, Depends
 from starlette.responses import Response
 
@@ -9,17 +8,16 @@ from service.bucket_service import get_owner_data, get_owner_buckets
 from settings import MONGODB
 from utils.auth import extract_token
 
-router = APIRouter(prefix="", tags=["buckets"])
+router = APIRouter(prefix="/api/json/buckets", tags=["buckets-json"])
 
 
 # List all buckets
-@router.get("/")
+@router.get("/", response_model=dict)
 def list_buckets(
     owner: str = Depends(extract_token),
 ):
     data = {"Owner": get_owner_data(owner), "Buckets": get_owner_buckets(owner)}
-    content = dicttoxml(data, attr_type=False, custom_root="ListAllMyBucketsResult")
-    return Response(content=content, media_type="application/xml")
+    return data
 
 
 @router.put("/{bucket}")
@@ -29,8 +27,7 @@ def create_bucket(
 ):
     logging.warning(f"Creating bucket {bucket}")
     MONGODB.buckets.insert_one({"_id": bucket, "Name": bucket, "Owner": owner, "CreationDate": datetime.now()})
-    content = dicttoxml({}, attr_type=False, custom_root="CreateBucketConfiguration")
-    return Response(content=content, media_type="application/xml")
+    return Response(status_code=201)
 
 
 @router.delete("/{bucket}")

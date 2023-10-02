@@ -1,5 +1,3 @@
-from xml.dom import minidom
-from dicttoxml import dicttoxml
 from fastapi import APIRouter, Depends
 from fastapi import Query
 from starlette.requests import Request
@@ -11,21 +9,17 @@ from service.bucket_service import create_bucket, get_owner_objects
 from settings import MONGODB
 from utils.auth import extract_token
 
-router = APIRouter(prefix="", tags=["objects"])
+router = APIRouter(prefix="/api/json/objects", tags=["objects-json"])
 
 
-@router.put("/{bucket}/{key:path}")
+@router.put("/{bucket}/{key:path}", status_code=201)
 async def handle_create_object(
     bucket: str,
     key: str,
     request: Request,
     owner: str = Depends(extract_token),
 ):
-    print(bucket, key)
     await create_bucket(bucket=bucket, key=key, request=request, owner=owner)
-
-    content = dicttoxml({}, attr_type=False, custom_root="CreateBucketConfiguration")
-    return Response(content=content, media_type="application/xml")
 
 
 @router.get("/{bucket}/{key:path}")
@@ -38,7 +32,6 @@ async def get_object(
         return Response(status_code=404)
     swarm_client = SwarmClient(server_url=data["SwarmData"]["SwarmServerUrl"])
     stream_content = swarm_client.download(data["SwarmData"]["reference"])
-
     return StreamingResponse(content=stream_content)
 
 
@@ -68,7 +61,7 @@ async def delete_object(
     return Response(status_code=204)
 
 
-@router.get("/{bucket}")
+@router.get("/{bucket}", response_model=list[dict])
 async def list_objects(
     bucket: str,
     prefix: str = None,
@@ -78,20 +71,4 @@ async def list_objects(
 ):
     continuation_token = continuation_token or 0
     data = get_owner_objects(bucket, owner, prefix=prefix, limit=max_keys, skip=continuation_token)
-    root = minidom.Document()
-    xml = root.createElement("ListBucketResult")
-    root.appendChild(xml)
-    counter = 0
-    for obj in data:
-        xml.appendChild(root.createElement("Contents"))
-        xml.lastChild.appendChild(root.createElement("Key")).appendChild(root.createTextNode(obj["Key"]))
-        xml.lastChild.appendChild(root.createElement("LastModified")).appendChild(
-            root.createTextNode(obj["CreationDate"].isoformat())
-        )
-        counter += 1
-    if counter == max_keys:
-        xml.appendChild(root.createElement("ContinuationToken")).appendChild(
-            root.createTextNode(continuation_token + counter)
-        )
-
-    return Response(content=root.toprettyxml(), media_type="application/octet-stream")
+    return data
