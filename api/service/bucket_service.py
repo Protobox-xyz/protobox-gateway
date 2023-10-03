@@ -1,16 +1,13 @@
 import logging
 from datetime import datetime
 from starlette.requests import Request
+
+from service.eth_service import verify_signature
 from swarm_sdk.sdk import SwarmClient
 from settings import MONGODB, SWARM_SERVER_URL_BZZ, SWARM_SERVER_URL_STAMP
-from hexbytes import HexBytes
-from eth_account.messages import encode_defunct
-from web3 import Web3
 from fastapi import HTTPException
 
 from models.batches_router import BatchResponse
-
-WEB3 = Web3()
 
 CREATE_BATCH_MESSAGE = "create batch"
 DELETE_BUCKET_MESSAGE = "delete bucket"
@@ -61,20 +58,8 @@ def get_owner_buckets(owner):
     yield from MONGODB.buckets.find({"Owner": owner})
 
 
-def verify_signature(signature: str, message_text) -> (bool, str):
-    if signature is None:
-        return False, None
-    try:
-        encoded_message = encode_defunct(text=message_text)
-        address = WEB3.eth.account.recover_message(encoded_message, signature=HexBytes(signature))
-    except Exception as e:
-        logging.error(e)
-        return False, None
-    return True, address
-
-
 async def create_batch(signature: str):
-    verify, owner = verify_signature(signature, CREATE_BATCH_MESSAGE)
+    verify, owner = await verify_signature(signature, CREATE_BATCH_MESSAGE)
 
     logging.info(f"creating batch with owner {owner}")
 
@@ -95,3 +80,8 @@ async def create_batch(signature: str):
     MONGODB.batches.insert_one({"_id": batch_id, "owner": owner, "batch_id": batch_id})
 
     return BatchResponse(batch_id=batch_id, owner=owner, _id=batch_id)
+
+
+async def is_owner(owner_address: str, batch_id: str):
+    batch = MONGODB.batches.find_one({"owner": owner_address, "batch_id": batch_id})
+    return False if not batch else True
