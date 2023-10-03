@@ -14,7 +14,7 @@ async def handle_create_batch(signature: str = Body(..., embed=True)):
     return await create_batch(signature)
 
 
-@router.get("", response_model=BatchResponse)
-async def handle_create_batch(batch_id: str):
+@router.get("", response_model=BatchResponse | None)
+async def handle_get_batch(batch_id: str):
     logging.warning(f"getting batch id {batch_id}")
     return MONGODB.batches.find_one({"batch_id": batch_id})

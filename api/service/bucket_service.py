@@ -12,6 +12,10 @@ from models.batches_router import BatchResponse
 
 WEB3 = Web3()
 
+CREATE_BATCH_MESSAGE = "create batch"
+DELETE_BUCKET_MESSAGE = "delete bucket"
+CREATE_BUCKET_MESSAGE = "create bucket"
+
 
 async def create_bucket(
     bucket: str,
@@ -57,11 +61,11 @@ def get_owner_buckets(owner):
     yield from MONGODB.buckets.find({"Owner": owner})
 
 
-def verify_signature(signature: str) -> (bool, str):
+def verify_signature(signature: str, message_text) -> (bool, str):
     if signature is None:
         return False, None
     try:
-        encoded_message = encode_defunct(text="create batch")
+        encoded_message = encode_defunct(text=message_text)
         address = WEB3.eth.account.recover_message(encoded_message, signature=HexBytes(signature))
     except Exception as e:
         logging.error(e)
@@ -70,7 +74,7 @@ def verify_signature(signature: str) -> (bool, str):
 
 
 async def create_batch(signature: str):
-    verify, owner = verify_signature(signature)
+    verify, owner = verify_signature(signature, CREATE_BATCH_MESSAGE)
 
     logging.info(f"creating batch with owner {owner}")
 
