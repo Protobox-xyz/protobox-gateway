@@ -8,6 +8,8 @@ services:
   api:
     container_name: protobox-gateway-api
     image: protobox-gateway-api:0.1
+    ports:
+      - "127.0.0.1:8000:8000"
     build:
       context: ./api
     networks:
