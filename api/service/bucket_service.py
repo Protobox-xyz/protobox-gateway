@@ -89,3 +89,15 @@ async def create_batch(owner: str):
 async def is_owner(owner_address: str, batch_id: str):
     batch = MONGODB.batches.find_one({"owner": owner_address, "batch_id": batch_id})
     return False if not batch else True
+
+
+async def get_object_data(bucket_id: str, key: str, owner_address: str):
+    data = MONGODB.objects.find_one({"_id": {"Bucket": bucket_id, "Key": key}})
+
+    if not data:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Bucket Not Found")
+
+    if not await is_owner(owner_address, data["Owner"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="invalid batch owner")
+
+    return data

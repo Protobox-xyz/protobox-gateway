@@ -6,7 +6,7 @@ from starlette.responses import Response, StreamingResponse
 
 from swarm_sdk.sdk import SwarmClient
 
-from service.bucket_service import create_bucket, get_owner_objects, is_owner
+from service.bucket_service import create_bucket, get_owner_objects, is_owner, get_object_data
 
 from settings import MONGODB
 from utils.auth import extract_signature
@@ -34,13 +34,7 @@ async def get_object(
     key: str,
     owner_address=Depends(extract_signature),
 ):
-    data = MONGODB.objects.find_one({"_id": {"Bucket": bucket_id, "Key": key}})
-
-    if not data:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Bucket Not Found")
-
-    if not await is_owner(owner_address, data["Owner"]):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="invalid batch owner")
+    data = await get_object_data(bucket_id, key, owner_address)
 
     swarm_client = SwarmClient(server_url=data["SwarmData"]["SwarmServerUrl"])
     stream_content = swarm_client.download(data["SwarmData"]["reference"])
@@ -53,13 +47,7 @@ async def head_object(
     key: str,
     owner_address=Depends(extract_signature),
 ):
-    data = MONGODB.objects.find_one({"_id": {"Bucket": bucket_id, "Key": key}})
-
-    if not data:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Bucket Not Found")
-
-    if not await is_owner(owner_address, data["Owner"]):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="invalid batch owner")
+    _ = await get_object_data(bucket_id, key, owner_address)
 
     return Response(status_code=200)
 
@@ -70,13 +58,7 @@ async def delete_object(
     key: str,
     owner_address=Depends(extract_signature),
 ):
-    data = MONGODB.objects.find_one({"_id": {"Bucket": bucket_id, "Key": key}})
-
-    if not data:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Bucket Not Found")
-
-    if not await is_owner(owner_address, data["Owner"]):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="invalid batch owner")
+    _ = await get_object_data(bucket_id, key, owner_address)
 
     MONGODB.objects.delete_one({"_id": {"Bucket": bucket_id, "Key": key}})
     return Response(status_code=204)
