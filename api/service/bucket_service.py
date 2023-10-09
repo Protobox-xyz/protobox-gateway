@@ -71,7 +71,7 @@ async def get_user_buckets(account_address):
 
 async def create_batch(owner: str):
     # in future this two var should be changed
-    amount = 100000000
+    amount = 100000000000
     depth = 20
 
     swarm_client = SwarmClient(batch_id=owner, server_url=SWARM_SERVER_URL_STAMP)
