@@ -52,6 +52,14 @@ def get_owner_buckets(owner):
     yield from MONGODB.buckets.find({"Owner": owner})
 
 
+async def get_user_buckets(account_address):
+    batches = MONGODB.batches.find({"owner": account_address})
+    buckets = []
+    for batch in batches:
+        buckets += list(MONGODB.buckets.find({"Owner": batch["batch_id"]}))
+    return buckets
+
+
 async def create_batch(owner: str):
     # in future this two var should be changed
     amount = 100000000

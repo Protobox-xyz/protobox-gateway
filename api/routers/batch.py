@@ -9,7 +9,7 @@ from utils.auth import extract_signature
 router = APIRouter(prefix="/api/json/batches", tags=["batches"])
 
 
-@router.put("", response_model=BatchResponse)
+@router.post("", response_model=BatchResponse)
 async def handle_create_batch(owner: str = Depends(extract_signature)):
     logging.warning(f"Creating batch")
     return await create_batch(owner)
