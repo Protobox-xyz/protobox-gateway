@@ -60,21 +60,9 @@ async def extract_token(request: Request):
     batch_id = request.headers.get("batch-id")
 
     if not batch_id:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing token")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing batch id")
 
-    signature = request.headers.get("signature")
-
-    if not signature:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing token")
-
-    try:
-        result, owner_address = await verify_signature(signature, SING_IN_MESSAGE)
-    except Exception as e:
-        logging.error(f"error while extracting auth {e}")
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid signature")
-
-    if not result:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid signature")
+    owner_address = await extract_signature(request=request)
 
     if not await is_owner(owner_address=owner_address, batch_id=batch_id):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="address is not the batch owner")
