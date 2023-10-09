@@ -2,6 +2,8 @@ from fastapi import APIRouter, Depends
 from fastapi import Query
 from starlette.requests import Request
 from starlette.responses import Response, StreamingResponse
+
+from models.auth import Auth
 from swarm_sdk.sdk import SwarmClient
 
 from service.bucket_service import create_bucket, get_owner_objects
@@ -17,9 +19,9 @@ async def handle_create_object(
     bucket: str,
     key: str,
     request: Request,
-    owner: str = Depends(extract_token),
+    auth: Auth = Depends(extract_token),
 ):
-    await create_bucket(bucket=bucket, key=key, request=request, owner=owner)
+    await create_bucket(bucket=bucket, key=key, request=request, owner=auth.batch_id)
 
 
 @router.get("/{bucket}/{key:path}")
@@ -50,12 +52,12 @@ async def head_object(
 async def delete_object(
     bucket: str,
     key: str,
-    owner: str = Depends(extract_token),
+    auth: Auth = Depends(extract_token),
 ):
     MONGODB.objects.delete_one(
         {
             "_id": {"Bucket": bucket, "Key": key},
-            "Owner": owner,
+            "Owner": auth.batch_id,
         }
     )
     return Response(status_code=204)
@@ -65,10 +67,10 @@ async def delete_object(
 async def list_objects(
     bucket: str,
     prefix: str = None,
-    owner: str = Depends(extract_token),
+    auth: Auth = Depends(extract_token),
     max_keys: int = Query(alias="max-keys", default=1000),
     continuation_token: int = Query(alias="continuation-token", default=None),
 ):
     continuation_token = continuation_token or 0
-    data = get_owner_objects(bucket, owner, prefix=prefix, limit=max_keys, skip=continuation_token)
+    data = get_owner_objects(bucket, auth.batch_id, prefix=prefix, limit=max_keys, skip=continuation_token)
     return data
