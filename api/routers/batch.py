@@ -11,7 +11,7 @@ router = APIRouter(prefix="/api/json/batches", tags=["batches"])
 
 @router.post("", response_model=BatchResponse)
 async def handle_create_batch(owner: str = Depends(extract_signature)):
-    logging.warning(f"Creating batch")
+    logging.info(f"Creating batch")
     return await create_batch(owner)
 
 
