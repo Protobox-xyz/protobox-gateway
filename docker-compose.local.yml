@@ -19,7 +19,7 @@ services:
     restart: unless-stopped
     environment:
       - MONGODB_CONNECTION_STRING=${MONGODB_CONNECTION_STRING:-mongodb://mongo:27017/}
-      - SWARM_SERVER_URL=${SWARM_SERVER_URL:-http://bee:1633/}
+      - SWARM_SERVER_URL_BZZ=${SWARM_SERVER_URL:-http://bee:1633/}
       - SWARM_SERVER_URL_STAMP=${SWARM_SERVER_URL:-http://bee:1635/}
   bee:
     image: ethersphere/bee:stable
