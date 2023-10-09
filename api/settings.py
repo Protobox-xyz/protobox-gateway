@@ -8,3 +8,5 @@ MONGODB = MONGODB_CLIENT.protobox
 
 SWARM_SERVER_URL_BZZ = os.environ.get("SWARM_SERVER_URL_BZZ", "http://localhost:1633/")
 SWARM_SERVER_URL_STAMP = os.environ.get("SWARM_SERVER_URL_STAMP", "http://localhost:1635/")
+
+SING_IN_MESSAGE = "Sign in to Protobox"

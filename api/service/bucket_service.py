@@ -2,16 +2,10 @@ import logging
 from datetime import datetime
 from starlette.requests import Request
 
-from service.eth_service import verify_signature
 from swarm_sdk.sdk import SwarmClient
 from settings import MONGODB, SWARM_SERVER_URL_BZZ, SWARM_SERVER_URL_STAMP
-from fastapi import HTTPException
 
 from models.batches_router import BatchResponse
-
-CREATE_BATCH_MESSAGE = "create batch"
-DELETE_BUCKET_MESSAGE = "delete bucket"
-CREATE_BUCKET_MESSAGE = "create bucket"
 
 
 async def create_bucket(
@@ -58,14 +52,7 @@ def get_owner_buckets(owner):
     yield from MONGODB.buckets.find({"Owner": owner})
 
 
-async def create_batch(signature: str):
-    verify, owner = await verify_signature(signature, CREATE_BATCH_MESSAGE)
-
-    logging.info(f"creating batch with owner {owner}")
-
-    if not verify:
-        raise HTTPException(status_code=400, detail="invalid signature")
-
+async def create_batch(owner: str):
     # in future this two var should be changed
     amount = 100000000
     depth = 20
