@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from starlette import status
 from starlette.responses import Response
 
-from models.bucket_json import CreateBucketResponse
+from models.bucket_json import CreateBucketRequest
 from service.bucket_service import get_user_buckets, is_owner
 from settings import MONGODB
 from utils.auth import extract_signature
@@ -25,7 +25,7 @@ async def list_buckets(
 
 @router.post("")
 async def create_bucket(
-    response: CreateBucketResponse,
+    response: CreateBucketRequest,
     owner_address: str = Depends(extract_signature),
 ):
     logging.warning(f"Creating bucket {owner_address}")
