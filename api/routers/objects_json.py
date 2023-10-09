@@ -18,14 +18,15 @@ router = APIRouter(prefix="/api/json/buckets/{bucket_id}/objects", tags=["object
 async def handle_create_object(
     bucket_id: str,
     key: str,
-    batch_id: str,
     request: Request,
     owner_address=Depends(extract_signature),
 ):
-    if not await is_owner(owner_address, batch_id):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="invalid batch owner")
+    bucket_info = MONGODB.buckets.find_one({"_id": bucket_id})
 
-    await create_bucket(bucket=bucket_id, key=key, request=request, owner=batch_id)
+    if not bucket_info or not await is_owner(owner_address, bucket_info["Owner"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="invalid bucket owner")
+
+    await create_bucket(bucket=bucket_id, key=key, request=request, owner=bucket_info["Owner"])
 
 
 @router.get("/{key:path}")
