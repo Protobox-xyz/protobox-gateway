@@ -19,8 +19,8 @@ services:
     restart: unless-stopped
     environment:
       - MONGODB_CONNECTION_STRING=${MONGODB_CONNECTION_STRING:-mongodb://mongo:27017/}
-      - SWARM_SERVER_URL_BZZ=${SWARM_SERVER_URL:-http://bee:1633/}
-      - SWARM_SERVER_URL_STAMP=${SWARM_SERVER_URL:-http://bee:1635/}
+      - SWARM_SERVER_URL_BZZ=${SWARM_SERVER_URL_BZZ:-http://bee:1633/}
+      - SWARM_SERVER_URL_STAMP=${SWARM_SERVER_URL_STAMP:-http://bee:1635/}
   bee:
     image: ethersphere/bee:stable
     container_name: protobox-gateway-bee
@@ -59,11 +59,14 @@ services:
       - "--postageBlockId=0000000000000000000000000000000000000000000000000000000000000000"
   mongo:
     container_name: protobox-gateway-mongo
-    image: mongo
+    image: mongo:7.0.0
     ports:
       - "127.0.0.1:27017:27017"
     networks:
       - protobox-gateway-network
     volumes:
-      - /home/protobox-data/mongodb:/data/db
+      - mongo-data:/data/db
     restart: unless-stopped
+
+volumes:
+  mongo-data:
