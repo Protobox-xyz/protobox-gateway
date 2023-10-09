@@ -31,7 +31,7 @@ async def create_bucket(
     logging.warning(f"Creating bucket {owner_address}")
 
     if not await is_owner(owner_address, response.batch_id):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid batch owner")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="invalid batch owner")
 
     MONGODB.buckets.insert_one(
         {"_id": uuid4().hex, "Name": response.bucket, "Owner": response.batch_id, "CreationDate": datetime.now()}
@@ -49,7 +49,7 @@ async def delete_bucket(
     bucket = MONGODB.buckets.find_one({"_id": bucket_id})
 
     if not await is_owner(owner_address, bucket["Owner"]):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid batch owner")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="invalid batch owner")
 
     MONGODB.buckets.delete_one({"_id": bucket_id})
     return Response(status_code=204)

@@ -1,5 +1,8 @@
 import logging
 from datetime import datetime
+
+from fastapi import HTTPException
+from starlette import status
 from starlette.requests import Request
 
 from swarm_sdk.sdk import SwarmClient
@@ -35,13 +38,19 @@ async def create_bucket(
     )
 
 
-def get_owner_objects(bucket, owner, prefix=None, limit=1000, skip=0):
-    query = {"Owner": owner, "Bucket": bucket}
+async def get_owner_objects(bucket_id, owner_address, prefix=None, limit=1000, skip=0):
+    bucket_info = MONGODB.buckets.find_one({"_id": bucket_id})
+
+    if not bucket_info or not await is_owner(owner_address, bucket_info["Owner"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="invalid bucket owner")
+
+    query = {"Bucket": bucket_id}
     skip = skip or 0
     limit = 1000 if limit is None else limit
     if prefix:
         query["Key"] = {"$regex": f"^{prefix}"}
-    yield from MONGODB.objects.find(query, {"_id": 0, "Content": 0}).skip(skip).limit(limit)
+
+    return list(MONGODB.objects.find(query, {"_id": 0, "Content": 0}).skip(skip).limit(limit))
 
 
 def get_owner_data(owner):
