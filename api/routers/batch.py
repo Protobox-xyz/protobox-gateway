@@ -1,7 +1,7 @@
 import logging
 
 from fastapi import APIRouter, Depends
-from service.batch_service import create_batch, get_owner_batches
+from service.batch_service import create_batch, get_owner_batches, get_batch_info
 from settings import MONGODB
 from models.batches_router import BatchResponse
 from utils.auth import extract_signature
@@ -18,7 +18,9 @@ async def handle_create_batch(owner: str = Depends(extract_signature)):
 @router.get("/{batch_id}", response_model=BatchResponse | None)
 async def handle_get_batch(batch_id: str, owner: str = Depends(extract_signature)):
     logging.info(f"getting batch id {batch_id}, requesting {owner}")
-    return MONGODB.batches.find_one({"batch_id": batch_id})
+    batch = MONGODB.batches.find_one({"batch_id": batch_id})
+    batch["info"] = await get_batch_info(batch_id=batch_id)
+    return batch
 
 
 @router.get("", response_model=list[BatchResponse])
