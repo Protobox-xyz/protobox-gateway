@@ -3,7 +3,7 @@ import logging
 from fastapi import HTTPException
 from starlette import status
 
-from models.batches_router import BatchResponse
+from models.batches_router import BatchResponse, BatchRequest
 from settings import SWARM_SERVER_URL_STAMP, MONGODB, ERC20_ABI, BZZ_COIN_ADDRESS
 from swarm_sdk.sdk import SwarmClient
 from service.blockchain_service import WEB3, sign_transaction
@@ -43,13 +43,14 @@ async def transfer_from_bzz_coins(owner_address: str, amount: int):
         )
 
 
-async def create_batch(owner: str, amount: int, label: str):
+async def create_batch(owner: str, batch: BatchRequest):
     # in future this two var should be changed
-    depth = 20
-    await transfer_from_bzz_coins(owner_address=owner, amount=amount)
+    await transfer_from_bzz_coins(owner_address=owner, amount=batch.amount)
 
     swarm_client = SwarmClient(batch_id=owner, server_url=SWARM_SERVER_URL_STAMP)
-    swarm_response, status_code = await swarm_client.create_batch(amount=amount, depth=depth, label=label)
+    swarm_response, status_code = await swarm_client.create_batch(
+        amount=batch.amount, depth=batch.depth, label=batch.label
+    )
 
     if 400 <= status_code:
         raise HTTPException(status_code=status_code, detail=swarm_response)

@@ -24,4 +24,5 @@ class BatchResponse(BaseModel):
 
 class BatchRequest(BaseModel):
     amount: int
+    depth: int
     label: str
