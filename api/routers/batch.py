@@ -1,7 +1,7 @@
 import logging
 
 from fastapi import APIRouter, Depends
-from service.bucket_service import create_batch
+from service.batch_service import create_batch, get_owner_batches
 from settings import MONGODB
 from models.batches_router import BatchResponse
 from utils.auth import extract_signature
@@ -23,5 +23,4 @@ async def handle_get_batch(batch_id: str, owner: str = Depends(extract_signature
 
 @router.get("", response_model=list[BatchResponse])
 async def handle_get_list_batches(owner: str = Depends(extract_signature)):
-    logging.info(f"getting batches {owner}")
-    return list(MONGODB.batches.find({"owner": owner}))
+    return await get_owner_batches(owner)

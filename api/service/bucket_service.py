@@ -1,4 +1,3 @@
-import logging
 from datetime import datetime
 
 from fastapi import HTTPException
@@ -6,9 +5,7 @@ from starlette import status
 from starlette.requests import Request
 
 from swarm_sdk.sdk import SwarmClient
-from settings import MONGODB, SWARM_SERVER_URL_BZZ, SWARM_SERVER_URL_STAMP
-
-from models.batches_router import BatchResponse
+from settings import MONGODB, SWARM_SERVER_URL_BZZ
 
 
 async def create_bucket(
@@ -67,23 +64,6 @@ async def get_user_buckets(account_address):
     for batch in batches:
         buckets += list(MONGODB.buckets.find({"Owner": batch["batch_id"]}))
     return buckets
-
-
-async def create_batch(owner: str):
-    # in future this two var should be changed
-    amount = 100000000
-    depth = 20
-
-    swarm_client = SwarmClient(batch_id=owner, server_url=SWARM_SERVER_URL_STAMP)
-    swarm_upload_data = await swarm_client.create_batch(amount=amount, depth=depth)
-
-    logging.info(f"created swarm batch id {swarm_upload_data}")
-
-    batch_id = swarm_upload_data["batchID"]
-
-    MONGODB.batches.insert_one({"_id": batch_id, "owner": owner, "batch_id": batch_id})
-
-    return BatchResponse(batch_id=batch_id, owner=owner, _id=batch_id)
 
 
 async def is_owner(owner_address: str, batch_id: str):
