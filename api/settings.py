@@ -11,7 +11,6 @@ SWARM_SERVER_URL_STAMP = os.environ.get("SWARM_SERVER_URL_STAMP", "http://localh
 BEE_PRIVATE_KEY = os.environ.get("BEE_PRIVATE_KEY", "")
 BZZ_COIN_ADDRESS = os.environ.get("BZZ_COIN_ADDRESS", "")
 RPC_URL = os.environ.get("RPC_URL", "")
-BEE_ACCOUNT_ADDRESS = os.environ.get("BEE_ACCOUNT_ADDRESS", "")
 
 SING_IN_MESSAGE = "Sign in to Protobox"
 

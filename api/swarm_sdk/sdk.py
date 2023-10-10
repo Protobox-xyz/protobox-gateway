@@ -37,16 +37,21 @@ class SwarmClient:
                 response.raise_for_status()
                 return await response.json()
 
-    async def create_batch(self, amount: int, depth: int):
-        api_url = urljoin(self.server_url, f"stamps/{amount}/{depth}")
+    async def create_batch(self, amount: int, depth: int, label: str):
+        api_url = urljoin(self.server_url, f"stamps/{amount}/{depth}?label={label}")
         async with aiohttp.ClientSession() as session:
             async with session.post(api_url) as response:
-                response.raise_for_status()
-                return await response.json()
+                return await response.json(), response.status
 
     async def get_batch_info(self, batch_id: str):
         api_url = urljoin(self.server_url, f"stamps/{batch_id}")
         async with aiohttp.ClientSession() as session:
             async with session.get(api_url) as response:
                 response.raise_for_status()
+                return await response.json()
+
+    async def get_addresses(self):
+        api_url = urljoin(self.server_url, f"addresses")
+        async with aiohttp.ClientSession() as session:
+            async with session.get(api_url) as response:
                 return await response.json()

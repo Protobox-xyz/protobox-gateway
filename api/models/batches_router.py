@@ -20,3 +20,8 @@ class BatchResponse(BaseModel):
     owner: str
     _id: str
     info: BatchInfo = {}
+
+
+class BatchRequest(BaseModel):
+    amount: int
+    label: str
