@@ -33,9 +33,9 @@ async def handle_create_object(
 async def get_object(
     bucket_id: str,
     key: str,
-    owner_address=Depends(extract_signature),
+    # owner_address=Depends(extract_signature),
 ):
-    data = await get_object_data(bucket_id, key, owner_address)
+    data = await get_object_data(bucket_id, key)
 
     swarm_client = SwarmClient(server_url=data["SwarmData"]["SwarmServerUrl"])
     stream_content = swarm_client.download(data["SwarmData"]["reference"])
