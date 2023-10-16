@@ -46,7 +46,6 @@ async def filter_prefixes(prefix: str, objects: list):
         # get child of this prefix
         children = key[len(prefix) :]
         children = children.split("/")
-        print(children)
         if len(children) < 1:
             continue
         child = prefix + children[0]
