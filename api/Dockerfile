@@ -4,10 +4,10 @@ ENV PYTHONPATH /app
 EXPOSE 8000
 
 WORKDIR /app
-ADD ./requirements.txt .
+COPY ./requirements.txt .
 
-RUN pip install -r requirements.txt
+RUN --mount=type=cache,target=/root/.cache pip install -r requirements.txt
 
-ADD . /app
+COPY . /app
 
-CMD uvicorn app:app --reload --host 0.0.0.0 --port 8000
+CMD uvicorn app:app --host 0.0.0.0 --port 8000

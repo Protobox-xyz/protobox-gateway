@@ -8,6 +8,8 @@ services:
   api:
     container_name: protobox-gateway-api
     image: protobox-gateway-api:0.1
+    ports:
+      - "127.0.0.1:8000:8000"
     build:
       context: ./api
     networks:
@@ -15,9 +17,8 @@ services:
     depends_on:
       - mongo
     restart: unless-stopped
-    environment:
-      - MONGODB_CONNECTION_STRING=${MONGODB_CONNECTION_STRING:-mongodb://localhost:27017/}
-      - SWARM_SERVER_URL=${SWARM_SERVER_URL:-http://localhost:1633/}
+    env_file:
+      - .env
   bee:
     image: ethersphere/bee:stable
     container_name: protobox-gateway-bee
@@ -56,11 +57,14 @@ services:
       - "--postageBlockId=0000000000000000000000000000000000000000000000000000000000000000"
   mongo:
     container_name: protobox-gateway-mongo
-    image: mongo
+    image: mongo:7.0.0
     ports:
       - "127.0.0.1:27017:27017"
     networks:
       - protobox-gateway-network
     volumes:
-      - /home/protobox-data/mongodb:/data/db
+      - mongo-data:/data/db
     restart: unless-stopped
+
+volumes:
+  mongo-data:
