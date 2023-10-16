@@ -64,6 +64,7 @@ async def filter_prefixes(prefix: str, objects: list):
                 "Owner": obj["Owner"],
                 "Name": children[0],
                 "Folder": len(children) > 1,
+                "CreationDate": obj["CreationDate"],
             }
         )
         used_folder[child] = True
