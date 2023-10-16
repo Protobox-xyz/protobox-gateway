@@ -36,15 +36,19 @@ async def create_bucket(
 
 
 async def filter_prefixes(prefix: str, objects: list):
+    if not prefix.endswith("/"):
+        prefix += "/"
+
     result = []
     used_folder = {}
     for obj in objects:
         key = obj["Key"]
-        if key == prefix:
+        if key == prefix[:-1]:
             result.append(obj)
             continue
         # get child of this prefix
         children = key[len(prefix) :]
+
         children = children.split("/")
         if len(children) < 1:
             continue
