@@ -58,7 +58,13 @@ async def filter_prefixes(prefix: str, objects: list):
             continue
 
         result.append(
-            {"Bucket": obj["Bucket"], "Key": child, "Owner": obj["Owner"], "Name": children[0], "Folder": True}
+            {
+                "Bucket": obj["Bucket"],
+                "Key": child,
+                "Owner": obj["Owner"],
+                "Name": children[0],
+                "Folder": len(children) > 1,
+            }
         )
         used_folder[child] = True
 
