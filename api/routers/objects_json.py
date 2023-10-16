@@ -3,6 +3,7 @@ from starlette import status
 from starlette.requests import Request
 from starlette.responses import Response, StreamingResponse
 
+from models.bucket_json import ObjectResponse
 from swarm_sdk.sdk import SwarmClient
 
 from service.bucket_service import create_bucket, get_owner_objects, is_owner, get_object_data
@@ -64,7 +65,7 @@ async def delete_object(
     return Response(status_code=204)
 
 
-@router.get("", response_model=list[dict])
+@router.get("", response_model=list[ObjectResponse])
 async def list_objects(
     bucket_id: str,
     prefix: str = "",
