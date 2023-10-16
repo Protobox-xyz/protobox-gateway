@@ -36,7 +36,7 @@ async def create_bucket(
 
 
 async def filter_prefixes(prefix: str, objects: list):
-    if prefix == "" and not prefix.endswith("/"):
+    if prefix != "" and not prefix.endswith("/"):
         prefix += "/"
 
     result = []
@@ -44,6 +44,7 @@ async def filter_prefixes(prefix: str, objects: list):
     for obj in objects:
         key = obj["Key"]
         if key == prefix[:-1]:
+            obj["Folder"] = False
             result.append(obj)
             continue
         # get child of this prefix
@@ -56,7 +57,9 @@ async def filter_prefixes(prefix: str, objects: list):
         if child in used_folder:
             continue
 
-        result.append({"Bucket": obj["Bucket"], "Key": child, "Owner": obj["Owner"], "Name": children[0]})
+        result.append(
+            {"Bucket": obj["Bucket"], "Key": child, "Owner": obj["Owner"], "Name": children[0], "Folder": True}
+        )
         used_folder[child] = True
 
     return result
