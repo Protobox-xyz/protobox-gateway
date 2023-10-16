@@ -36,7 +36,7 @@ async def create_bucket(
 
 
 async def filter_prefixes(prefix: str, objects: list):
-    if not prefix.endswith("/"):
+    if prefix == "" and not prefix.endswith("/"):
         prefix += "/"
 
     result = []
