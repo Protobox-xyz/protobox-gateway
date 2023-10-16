@@ -35,19 +35,42 @@ async def create_bucket(
     )
 
 
-async def get_owner_objects(bucket_id, owner_address, prefix=None, limit=1000, skip=0):
+async def filter_prefixes(prefix: str, objects: list):
+    result = []
+    used_folder = {}
+    for obj in objects:
+        key = obj["Key"]
+        if key == prefix:
+            result.append(obj)
+            continue
+        # get child of this prefix
+        children = key[len(prefix) :]
+        children = children.split("/")
+        print(children)
+        if len(children) < 1:
+            continue
+        child = prefix + children[0]
+        if child in used_folder:
+            continue
+
+        result.append({"Bucket": obj["Bucket"], "Key": child, "Owner": obj["Owner"], "Name": children[0]})
+        used_folder[child] = True
+
+    return result
+
+
+async def get_owner_objects(bucket_id, owner_address, prefix=""):
     bucket_info = MONGODB.buckets.find_one({"_id": bucket_id})
 
     if not bucket_info or not await is_owner(owner_address, bucket_info["Owner"]):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="invalid bucket owner")
 
     query = {"Bucket": bucket_id}
-    skip = skip or 0
-    limit = 1000 if limit is None else limit
-    if prefix:
+    if prefix != "":
         query["Key"] = {"$regex": f"^{prefix}"}
 
-    return list(MONGODB.objects.find(query, {"_id": 0, "Content": 0}).skip(skip).limit(limit))
+    objects = list(MONGODB.objects.find(query, {"_id": 0, "Content": 0}))
+    return await filter_prefixes(prefix, objects)
 
 
 def get_owner_data(owner):

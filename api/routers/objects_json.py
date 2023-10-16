@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, HTTPException
-from fastapi import Query
 from starlette import status
 from starlette.requests import Request
 from starlette.responses import Response, StreamingResponse
@@ -48,7 +47,7 @@ async def head_object(
     key: str,
     owner_address=Depends(extract_signature),
 ):
-    _ = await get_object_data(bucket_id, key, owner_address)
+    await get_object_data(bucket_id, key, owner_address)
 
     return Response(status_code=200)
 
@@ -59,7 +58,7 @@ async def delete_object(
     key: str,
     owner_address=Depends(extract_signature),
 ):
-    _ = await get_object_data(bucket_id, key, owner_address)
+    await get_object_data(bucket_id, key, owner_address)
 
     MONGODB.objects.delete_one({"_id": {"Bucket": bucket_id, "Key": key}})
     return Response(status_code=204)
@@ -68,10 +67,8 @@ async def delete_object(
 @router.get("", response_model=list[dict])
 async def list_objects(
     bucket_id: str,
-    prefix: str = None,
-    limit: int = Query(default=1000),
-    skip: int = Query(default=0),
+    prefix: str = "",
     owner_address: str = Depends(extract_signature),
 ):
-    data = await get_owner_objects(bucket_id, owner_address, prefix=prefix, limit=limit, skip=skip)
+    data = await get_owner_objects(bucket_id, owner_address, prefix=prefix)
     return data
