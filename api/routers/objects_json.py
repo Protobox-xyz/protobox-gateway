@@ -39,7 +39,7 @@ async def get_object(
 
     swarm_client = SwarmClient(server_url=data["SwarmData"]["SwarmServerUrl"])
     stream_content = swarm_client.download(data["SwarmData"]["reference"])
-    return StreamingResponse(content=stream_content)
+    return StreamingResponse(content=stream_content, headers={"Cache-Control": "max-age=604800"})
 
 
 @router.head("/{key:path}")
