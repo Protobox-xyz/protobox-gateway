@@ -15,6 +15,7 @@ services:
     networks:
       - protobox-gateway-network
     depends_on:
+      - bee
       - mongo
     restart: unless-stopped
     env_file:

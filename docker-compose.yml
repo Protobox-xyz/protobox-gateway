@@ -12,10 +12,37 @@ services:
       context: ./api
     networks:
       - protobox-gateway-network
+    depends_on:
+      - bee
+      - mongo
     restart: unless-stopped
+    env_file:
+      - .env
     environment:
       - MONGODB_CONNECTION_STRING=${MONGODB_CONNECTION_STRING:-mongodb://localhost:27017/}
       - SWARM_SERVER_URL=${SWARM_SERVER_URL:-http://localhost:1633/}
+  bee:
+    image: ethersphere/bee:stable
+    container_name: protobox-gateway-bee
+    networks:
+      - protobox-gateway-network
+    volumes:
+      - ./bee/.bee:/home/bee/.bee
+    ports:
+      - "1633:1633"
+      - "1634:1634"
+      - "1635:1635"
+    command:
+      - "start"
+      - "--welcome-message='Bzzzz bzzz bzz bzz. 🐝'"
+      - '--blockchain-rpc-endpoint=https://muddy-dry-darkness.xdai.discover.quiknode.pro/13e54c30c96182a3fc65088ff47f7a3fc3231585/'
+      - "--debug-api-enable"
+      - "--full-node"
+      - "--swap-initial-deposit=0"
+      - "--tracing-enable"
+      - "--network-id=1"
+      - "--password=123"
+      - "--mainnet"
   nginx:
     image: nginx:latest
     container_name: protobox-gateway-nginx
