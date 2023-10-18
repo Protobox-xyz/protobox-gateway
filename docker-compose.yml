@@ -1,8 +1,8 @@
 version: "3.7"
 
 networks:
-  protobox-gateway-network:
-    driver: bridge
+  protobox-network:
+    external: true
 
 services:
   api:
@@ -11,22 +11,9 @@ services:
     build:
       context: ./api
     networks:
-      - protobox-gateway-network
+      - protobox-network
     restart: unless-stopped
     env_file:
       - .env
 
-  nginx:
-    image: nginx:latest
-    container_name: protobox-gateway-nginx
-    networks:
-      - protobox-gateway-network
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
-      - /root/ssl/:/root/ssl/
-    ports:
-      - "80:80"
-      - "443:443"
-    restart: unless-stopped
-    depends_on:
-      - api
+
