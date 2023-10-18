@@ -18,9 +18,7 @@ services:
     restart: unless-stopped
     env_file:
       - .env
-    environment:
-      - MONGODB_CONNECTION_STRING=${MONGODB_CONNECTION_STRING:-mongodb://localhost:27017/}
-      - SWARM_SERVER_URL=${SWARM_SERVER_URL:-http://localhost:1633/}
+
   bee:
     image: ethersphere/bee:stable
     container_name: protobox-gateway-bee
