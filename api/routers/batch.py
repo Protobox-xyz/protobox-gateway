@@ -34,7 +34,7 @@ async def handle_get_task(task_id: str, _: str = Depends(extract_signature)):
     task_info = MONGODB.tasks.find_one({"_id": task_id})
 
     if not task_info["finished"]:
-        return Response(status_code=status.HTTP_102_PROCESSING)
+        return Response(status_code=status.HTTP_425_TOO_EARLY)
 
     if task_info["status_code"] >= 400:
         return Response(status_code=task_info["status_code"])
