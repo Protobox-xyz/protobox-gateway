@@ -1,6 +1,6 @@
 import logging
 
-from models.batches_router import BatchResponse, BatchRequest
+from models.batches_router import BatchRequest
 from settings import SWARM_SERVER_URL_STAMP, MONGODB, ERC20_ABI, BZZ_COIN_ADDRESS
 from swarm_sdk.sdk import SwarmClient
 from service.blockchain_service import WEB3, sign_transaction
@@ -41,7 +41,7 @@ async def transfer_from_bzz_coins(owner_address: str, amount: int):
 
 async def create_batch_task(task_id: str, owner: str, batch: BatchRequest):
     # in future this two var should be changed
-    success = await transfer_from_bzz_coins(owner_address=owner, amount=batch.amount)
+    success = True
 
     if not success:
         MONGODB.tasks.replace_one({"_id": task_id}, {"finished": True, "status_code": 422, "response": {}})
@@ -70,9 +70,7 @@ async def create_batch_task(task_id: str, owner: str, batch: BatchRequest):
         {
             "finished": True,
             "status_code": status_code,
-            "response": BatchResponse(
-                batch_id=batch_id, owner=owner, _id=batch_id, info=await get_batch_info(batch_id)
-            ),
+            "response": {"batch_id": batch_id, "owner": owner, "info": await get_batch_info(batch_id), "_id": batch_id},
         },
     )
 
