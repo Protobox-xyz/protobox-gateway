@@ -1,8 +1,5 @@
 import logging
 
-from fastapi import HTTPException
-from starlette import status
-
 from models.batches_router import BatchResponse, BatchRequest
 from settings import SWARM_SERVER_URL_STAMP, MONGODB, ERC20_ABI, BZZ_COIN_ADDRESS
 from swarm_sdk.sdk import SwarmClient
@@ -36,16 +33,19 @@ async def transfer_from_bzz_coins(owner_address: str, amount: int):
         await sign_transaction(call_function=call_function)
 
         logging.info(f"transferring from {owner_address} to {bee_ethereum_address} amount: {amount}")
+        return True
     except Exception as e:
         logging.error(f"error while transferring error message: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_402_PAYMENT_REQUIRED, detail="cant transfer money from owner's account"
-        )
+        return False
 
 
-async def create_batch(owner: str, batch: BatchRequest):
+async def create_batch_task(task_id: str, owner: str, batch: BatchRequest):
     # in future this two var should be changed
-    await transfer_from_bzz_coins(owner_address=owner, amount=batch.amount)
+    success = await transfer_from_bzz_coins(owner_address=owner, amount=batch.amount)
+
+    if not success:
+        MONGODB.tasks.replace_one({"_id": task_id}, {"finished": True, "status_code": 422, "response": {}})
+        return
 
     swarm_client = SwarmClient(batch_id=owner, server_url=SWARM_SERVER_URL_STAMP)
     swarm_response, status_code = await swarm_client.create_batch(
@@ -53,7 +53,11 @@ async def create_batch(owner: str, batch: BatchRequest):
     )
 
     if 400 <= status_code:
-        raise HTTPException(status_code=status_code, detail=swarm_response)
+        logging.error(f"error while creating batch: {swarm_response}")
+        MONGODB.tasks.replace_one(
+            {"_id": task_id}, {"finished": True, "status_code": status_code, "response": swarm_response}
+        )
+        return
 
     logging.info(f"created swarm batch id {swarm_response}")
 
@@ -61,7 +65,16 @@ async def create_batch(owner: str, batch: BatchRequest):
 
     MONGODB.batches.insert_one({"_id": batch_id, "owner": owner, "batch_id": batch_id})
 
-    return BatchResponse(batch_id=batch_id, owner=owner, _id=batch_id, info=await get_batch_info(batch_id))
+    MONGODB.tasks.replace_one(
+        {"_id": task_id},
+        {
+            "finished": True,
+            "status_code": status_code,
+            "response": BatchResponse(
+                batch_id=batch_id, owner=owner, _id=batch_id, info=await get_batch_info(batch_id)
+            ),
+        },
+    )
 
 
 async def get_batch_info(batch_id):

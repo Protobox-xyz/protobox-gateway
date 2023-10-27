@@ -1,20 +1,34 @@
 import logging
+from uuid import uuid4
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from starlette import status
 
-from service.batch_service import create_batch, get_owner_batches, get_batch_info
+from service.batch_service import create_batch_task, get_owner_batches, get_batch_info
 from settings import MONGODB
-from models.batches_router import BatchResponse, BatchRequest
+from models.batches_router import BatchResponse, BatchRequest, BatchTaskRequest
 from utils.auth import extract_signature
 
 router = APIRouter(prefix="/api/json/batches", tags=["batches"])
 
 
-@router.post("", response_model=BatchResponse)
-async def handle_create_batch(request: BatchRequest, owner: str = Depends(extract_signature)):
+@router.post("", response_model=BatchTaskRequest)
+async def handle_create_batch(
+    background_task: BackgroundTasks, request: BatchRequest, owner: str = Depends(extract_signature)
+):
     logging.info(f"Creating batch")
-    return await create_batch(owner, request)
+
+    task_id = uuid4().hex
+    background_task.add_task(create_batch_task, task_id, owner, request)
+    MONGODB.tasks.insert_one({"_id": task_id, "finished": False})
+
+    return BatchTaskRequest(task_id=task_id, message="starting processing..")
+
+
+@router.get("/get-task")
+async def handle_create_batch(task_id: str, _: str = Depends(extract_signature)):
+    logging.info(f"getting status")
+    return MONGODB.tasks.find_one({"_id": task_id})
 
 
 @router.get("/{batch_id}", response_model=BatchResponse | None)
