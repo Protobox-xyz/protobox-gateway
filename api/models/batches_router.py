@@ -1,5 +1,3 @@
-from typing import Optional
-
 from pydantic import BaseModel
 
 
@@ -33,10 +31,3 @@ class BatchRequest(BaseModel):
 class BatchTaskRequest(BaseModel):
     task_id: str
     message: str
-
-
-class BatchTaskResponse(BaseModel):
-    _id: str
-    finished: bool
-    status_code: Optional[int]
-    response: Optional[BatchResponse] | dict

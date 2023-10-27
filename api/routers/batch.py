@@ -3,6 +3,8 @@ from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from starlette import status
+from starlette.responses import Response
+
 
 from service.batch_service import create_batch_task, get_owner_batches, get_batch_info
 from settings import MONGODB
@@ -12,7 +14,7 @@ from utils.auth import extract_signature
 router = APIRouter(prefix="/api/json/batches", tags=["batches"])
 
 
-@router.post("", response_model=BatchTaskRequest)
+@router.post("", response_model=BatchTaskRequest, status_code=status.HTTP_202_ACCEPTED)
 async def handle_create_batch(
     background_task: BackgroundTasks, request: BatchRequest, owner: str = Depends(extract_signature)
 ):
@@ -25,10 +27,19 @@ async def handle_create_batch(
     return BatchTaskRequest(task_id=task_id, message="starting processing..")
 
 
-@router.get("/get-task")
-async def handle_create_batch(task_id: str, _: str = Depends(extract_signature)):
+@router.get("/task/{task_id}", response_model=BatchResponse)
+async def handle_get_task(task_id: str, _: str = Depends(extract_signature)):
     logging.info(f"getting status")
-    return MONGODB.tasks.find_one({"_id": task_id})
+
+    task_info = MONGODB.tasks.find_one({"_id": task_id})
+
+    if not task_info["finished"]:
+        return Response(status_code=status.HTTP_102_PROCESSING)
+
+    if task_info["status_code"] >= 400:
+        return Response(status_code=task_info["status_code"])
+
+    return task_info["response"]
 
 
 @router.get("/{batch_id}", response_model=BatchResponse | None)
