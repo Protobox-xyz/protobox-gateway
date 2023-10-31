@@ -27,7 +27,7 @@ async def handle_create_batch(
     return BatchTaskRequest(task_id=task_id, message="starting processing..")
 
 
-@router.get("/task/{task_id}", response_model=BatchResponse)
+@router.get("/tasks/{task_id}", response_model=BatchResponse)
 async def handle_get_task(task_id: str, _: str = Depends(extract_signature)):
     logging.info(f"getting status")
 
