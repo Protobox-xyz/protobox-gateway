@@ -8,7 +8,7 @@ from tests.conftest import HEADERS, TOKEN
 
 @pytest.mark.skip()
 def test_list_buckets_api_wo_token(api):
-    response = api.get("/")
+    response = api.get("/", headers=HEADERS)
     assert response.status_code == 401
     data = response.json()
     assert data["detail"][0]["loc"] == ["header", "x-amz-security-token"]

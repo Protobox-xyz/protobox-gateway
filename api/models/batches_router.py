@@ -26,3 +26,8 @@ class BatchRequest(BaseModel):
     amount: int
     depth: int
     label: str
+
+
+class BatchTaskRequest(BaseModel):
+    task_id: str
+    message: str
