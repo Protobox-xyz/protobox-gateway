@@ -9,7 +9,7 @@ import settings
 
 settings.MONGODB = mongomock.MongoClient().protobox
 
-TOKEN = "123123"
+TOKEN = "0x18a22dc629c07c02cbba3942ce3b977db76d23bc08e722eb6be42a5b6d6d7a8d02e271a6e88895a8662d5339d33efc8ca442299a01e5b5becc3145b5f01eea5c1c"
 HEADERS = {"x-amz-security-token": TOKEN}
 
 
