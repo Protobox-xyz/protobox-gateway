@@ -88,4 +88,5 @@ async def get_owner_batches(owner):
     batches = list(MONGODB.batches.find({"owner": owner}).sort("created_at"))
     for batch in batches:
         batch["info"] = await get_batch_info(batch["batch_id"])
+
     return batches

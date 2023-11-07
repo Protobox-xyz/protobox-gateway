@@ -22,8 +22,8 @@ class BatchResponse(BaseModel):
     owner: str
     _id: str
     info: BatchInfo = {}
-    created_at: datetime = Field(None)
-    updated_at: datetime = Field(None)
+    created_at: datetime = Field(default=datetime.fromisoformat("2023-10-07T10:44:03.201000"))
+    updated_at: datetime = Field(default=datetime.fromisoformat("2023-10-07T10:44:03.201000"))
 
 
 class BatchRequest(BaseModel):
