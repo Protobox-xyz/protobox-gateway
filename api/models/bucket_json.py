@@ -18,6 +18,7 @@ class ObjectResponse(BaseModel):
     Bucket: str
     Key: str
     Owner: str
+    Name: str
     CreationDate: Optional[datetime]
     SwarmData: Optional[SwarmData]
     Folder: bool
