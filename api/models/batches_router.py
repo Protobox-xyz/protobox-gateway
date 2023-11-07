@@ -1,4 +1,6 @@
-from pydantic import BaseModel
+from datetime import datetime
+
+from pydantic import BaseModel, Field
 
 
 class BatchInfo(BaseModel):
@@ -20,6 +22,8 @@ class BatchResponse(BaseModel):
     owner: str
     _id: str
     info: BatchInfo = {}
+    created_at: datetime = Field(None)
+    updated_at: datetime = Field(None)
 
 
 class BatchRequest(BaseModel):

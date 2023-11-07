@@ -1,3 +1,4 @@
+from datetime import datetime
 import logging
 
 from models.batches_router import BatchRequest
@@ -40,7 +41,6 @@ async def transfer_from_bzz_coins(owner_address: str, amount: int):
 
 
 async def create_batch_task(task_id: str, owner: str, batch: BatchRequest):
-    # in future this two var should be changed
     success = await transfer_from_bzz_coins(owner_address=owner, amount=batch.amount)
 
     if not success:
@@ -63,7 +63,10 @@ async def create_batch_task(task_id: str, owner: str, batch: BatchRequest):
 
     batch_id = swarm_response["batchID"]
 
-    MONGODB.batches.insert_one({"_id": batch_id, "owner": owner, "batch_id": batch_id})
+    now = datetime.utcnow()
+    MONGODB.batches.insert_one(
+        {"_id": batch_id, "owner": owner, "batch_id": batch_id, "created_at": now, "updated_at": now}
+    )
 
     MONGODB.tasks.replace_one(
         {"_id": task_id},
@@ -82,7 +85,7 @@ async def get_batch_info(batch_id):
 
 async def get_owner_batches(owner):
     logging.info(f"getting batches {owner}")
-    batches = list(MONGODB.batches.find({"owner": owner}))
+    batches = list(MONGODB.batches.find({"owner": owner}).sort("created_at"))
     for batch in batches:
         batch["info"] = await get_batch_info(batch["batch_id"])
     return batches
