@@ -45,8 +45,6 @@ async def extract_aws_token(request: Request) -> Auth | None:
         logging.error(f"error while extracting auth {e}")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid signature")
 
-    print(SING_IN_MESSAGE, signature)
-    print(owner_address)
     if not result:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid signature")
 
