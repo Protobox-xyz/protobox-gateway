@@ -33,9 +33,9 @@ async def handle_create_object(
 async def get_object(
     bucket_id: str,
     key: str,
-    # owner_address=Depends(extract_signature),
+    owner_address=Depends(extract_signature),
 ):
-    data = await get_object_data(bucket_id, key)
+    data = await get_object_data(bucket_id, key, owner_address)
 
     swarm_client = SwarmClient(server_url=data["SwarmData"]["SwarmServerUrl"])
     stream_content = swarm_client.download(data["SwarmData"]["reference"])
@@ -59,9 +59,7 @@ async def delete_object(
     key: str,
     owner_address=Depends(extract_signature),
 ):
-    await get_object_data(bucket_id, key, owner_address)
-
-    MONGODB.objects.delete_one({"_id": {"Bucket": bucket_id, "Key": key}})
+    MONGODB.objects.delete_many({"_id.Bucket": bucket_id, "Key": {"$regex": f"^{key}"}})
     return Response(status_code=204)
 
 
