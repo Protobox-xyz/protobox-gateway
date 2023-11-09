@@ -59,6 +59,11 @@ async def delete_object(
     key: str,
     owner_address=Depends(extract_signature),
 ):
+    bucket_info = MONGODB.buckets.find_one({"_id": bucket_id})
+
+    if not bucket_info or not await is_owner(owner_address, bucket_info["Owner"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="invalid bucket owner")
+
     MONGODB.objects.delete_many({"_id.Bucket": bucket_id, "Key": {"$regex": f"^{key}"}})
     return Response(status_code=204)
 
