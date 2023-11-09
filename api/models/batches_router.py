@@ -32,6 +32,15 @@ class BatchRequest(BaseModel):
     label: str
 
 
+class BatchExtendRequest(BaseModel):
+    amount: int
+
+
 class BatchTaskRequest(BaseModel):
     task_id: str
     message: str
+
+
+class TaskResponse(BaseModel):
+    batch_id: str
+    owner: str

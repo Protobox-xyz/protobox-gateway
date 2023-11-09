@@ -5,10 +5,9 @@ from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from starlette import status
 from starlette.responses import Response
 
-
-from service.batch_service import create_batch_task, get_owner_batches, get_batch_info
+from service.batch_service import create_batch_task, get_owner_batches, get_batch_info, extend_batch_task
 from settings import MONGODB
-from models.batches_router import BatchResponse, BatchRequest, BatchTaskRequest
+from models.batches_router import BatchResponse, BatchRequest, BatchTaskRequest, BatchExtendRequest, TaskResponse
 from utils.auth import extract_signature
 
 router = APIRouter(prefix="/api/json/batches", tags=["batches"])
@@ -27,7 +26,23 @@ async def handle_create_batch(
     return BatchTaskRequest(task_id=task_id, message="starting processing..")
 
 
-@router.get("/tasks/{task_id}", response_model=BatchResponse)
+@router.post("/{batch_id}/_extend", response_model=BatchTaskRequest, status_code=status.HTTP_202_ACCEPTED)
+async def handle_extend_batch(
+    background_task: BackgroundTasks,
+    request: BatchExtendRequest,
+    batch_id: str,
+    owner: str = Depends(extract_signature),
+):
+    logging.info(f"Extending batch batch")
+
+    task_id = uuid4().hex
+    background_task.add_task(extend_batch_task, task_id, batch_id, owner, request)
+    MONGODB.tasks.insert_one({"_id": task_id, "finished": False})
+
+    return BatchTaskRequest(task_id=task_id, message="starting processing..")
+
+
+@router.get("/tasks/{task_id}", response_model=TaskResponse)
 async def handle_get_task(task_id: str, _: str = Depends(extract_signature)):
     logging.info(f"getting status")
 
