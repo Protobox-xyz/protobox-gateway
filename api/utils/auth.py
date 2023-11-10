@@ -1,6 +1,6 @@
 import logging
 
-from fastapi import HTTPException
+from fastapi import HTTPException, Header
 from starlette import status
 from starlette.requests import Request
 
@@ -23,17 +23,22 @@ def extract_token_from_aws_v4_auth_header(auth_header: str) -> str | None:
     return credential_parts.split("/")[0]
 
 
-async def extract_aws_token(request: Request) -> Auth | None:
+async def extract_aws_token(
+    request: Request,
+    x_amz_security_token: str = Header(None),
+    authorization: str = Header(None),
+    x_amz_token: str = Header(None),
+) -> Auth | None:
     token = None
-    auth_header = request.headers.get("Authorization") or request.headers.get("authorization")
-    if auth_header:
-        token = extract_token_from_aws_v4_auth_header(auth_header)
-    if not token:
-        token = request.headers.get("x-amz-security-token") or request.headers.get("X-Amz-Security-Token")
-    if not token:
-        token = request.headers.get("x-amz-token") or request.headers.get("X-Amz-Token")
-    if not token:
-        token = None
+
+    if x_amz_token:
+        token = token
+    elif x_amz_security_token:
+        token = x_amz_security_token
+    elif authorization:
+        token = authorization
+    else:
+        token = extract_token_from_aws_v4_auth_header
 
     if not token:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing token")

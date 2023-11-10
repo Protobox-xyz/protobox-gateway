@@ -6,7 +6,7 @@ from starlette.requests import Request
 from starlette.responses import Response, StreamingResponse
 from swarm_sdk.sdk import SwarmClient
 
-from service.bucket_service import create_bucket, get_owner_objects
+from service.bucket_service import create_bucket, get_owner_objects_s3
 
 from settings import MONGODB
 from utils.auth import extract_aws_token
@@ -72,13 +72,13 @@ async def delete_object(
 @router.get("/{bucket}")
 async def list_objects(
     bucket: str,
-    prefix: str = None,
+    prefix: str = "",
     auth: Auth = Depends(extract_aws_token),
     max_keys: int = Query(alias="max-keys", default=1000),
     continuation_token: int = Query(alias="continuation-token", default=None),
 ):
     continuation_token = continuation_token or 0
-    data = get_owner_objects(bucket, auth.batch_id, prefix=prefix, limit=max_keys, skip=continuation_token)
+    data = await get_owner_objects_s3(bucket, auth.batch_id, prefix=prefix, limit=max_keys, skip=continuation_token)
     root = minidom.Document()
     xml = root.createElement("ListBucketResult")
     root.appendChild(xml)
@@ -94,5 +94,4 @@ async def list_objects(
         xml.appendChild(root.createElement("ContinuationToken")).appendChild(
             root.createTextNode(continuation_token + counter)
         )
-
     return Response(content=root.toprettyxml(), media_type="application/octet-stream")
