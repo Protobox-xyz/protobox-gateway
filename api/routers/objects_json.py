@@ -33,9 +33,9 @@ async def handle_create_object(
 async def get_object(
     bucket_id: str,
     key: str,
-    # owner_address=Depends(extract_signature),
+    owner_address=Depends(extract_signature),
 ):
-    data = await get_object_data(bucket_id, key)
+    data = await get_object_data(bucket_id, key, owner_address)
 
     swarm_client = SwarmClient(server_url=data["SwarmData"]["SwarmServerUrl"])
     stream_content = swarm_client.download(data["SwarmData"]["reference"])
@@ -59,9 +59,12 @@ async def delete_object(
     key: str,
     owner_address=Depends(extract_signature),
 ):
-    await get_object_data(bucket_id, key, owner_address)
+    bucket_info = MONGODB.buckets.find_one({"_id": bucket_id})
 
-    MONGODB.objects.delete_one({"_id": {"Bucket": bucket_id, "Key": key}})
+    if not bucket_info or not await is_owner(owner_address, bucket_info["Owner"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="invalid bucket owner")
+
+    MONGODB.objects.delete_many({"_id.Bucket": bucket_id, "Key": {"$regex": f"^{key}"}})
     return Response(status_code=204)
 
 

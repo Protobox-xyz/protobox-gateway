@@ -19,6 +19,5 @@ class ObjectResponse(BaseModel):
     Key: str
     Owner: str
     Name: str
-    CreationDate: Optional[datetime]
-    SwarmData: Optional[SwarmData]
+    CreationDate: Optional[datetime] = None
     Folder: bool

@@ -1,6 +1,7 @@
+from datetime import datetime
 import logging
 
-from models.batches_router import BatchRequest
+from models.batches_router import BatchRequest, BatchExtendRequest
 from settings import SWARM_SERVER_URL_STAMP, MONGODB, ERC20_ABI, BZZ_COIN_ADDRESS
 from swarm_sdk.sdk import SwarmClient
 from service.blockchain_service import WEB3, sign_transaction
@@ -40,7 +41,6 @@ async def transfer_from_bzz_coins(owner_address: str, amount: int):
 
 
 async def create_batch_task(task_id: str, owner: str, batch: BatchRequest):
-    # in future this two var should be changed
     success = await transfer_from_bzz_coins(owner_address=owner, amount=batch.amount)
 
     if not success:
@@ -63,7 +63,42 @@ async def create_batch_task(task_id: str, owner: str, batch: BatchRequest):
 
     batch_id = swarm_response["batchID"]
 
-    MONGODB.batches.insert_one({"_id": batch_id, "owner": owner, "batch_id": batch_id})
+    now = datetime.utcnow()
+    MONGODB.batches.insert_one(
+        {"_id": batch_id, "owner": owner, "batch_id": batch_id, "created_at": now, "updated_at": now}
+    )
+
+    MONGODB.tasks.replace_one(
+        {"_id": task_id},
+        {
+            "finished": True,
+            "status_code": status_code,
+            "response": {"batch_id": batch_id, "owner": owner, "info": await get_batch_info(batch_id), "_id": batch_id},
+        },
+    )
+
+
+async def extend_batch_task(task_id: str, batch_id: str, owner: str, batch: BatchExtendRequest):
+    success = await transfer_from_bzz_coins(owner_address=owner, amount=batch.amount)
+
+    if not success:
+        MONGODB.tasks.replace_one({"_id": task_id}, {"finished": True, "status_code": 402, "response": {}})
+        return
+
+    swarm_client = SwarmClient(batch_id=owner, server_url=SWARM_SERVER_URL_STAMP)
+    swarm_response, status_code = await swarm_client.extend_batch(batch_id=batch_id, amount=batch.amount)
+
+    if 400 <= status_code:
+        logging.error(f"error while creating batch: {swarm_response}")
+        MONGODB.tasks.replace_one(
+            {"_id": task_id}, {"finished": True, "status_code": status_code, "response": swarm_response}
+        )
+        return
+
+    logging.info(f"created swarm batch id {swarm_response}")
+
+    now = datetime.utcnow()
+    MONGODB.batches.update_one({"_id": batch_id}, {"$set": {"updated_at": now}})
 
     MONGODB.tasks.replace_one(
         {"_id": task_id},
@@ -82,7 +117,8 @@ async def get_batch_info(batch_id):
 
 async def get_owner_batches(owner):
     logging.info(f"getting batches {owner}")
-    batches = list(MONGODB.batches.find({"owner": owner}))
+    batches = list(MONGODB.batches.find({"owner": owner}).sort("created_at"))
     for batch in batches:
         batch["info"] = await get_batch_info(batch["batch_id"])
+
     return batches

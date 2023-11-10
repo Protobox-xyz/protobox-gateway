@@ -43,6 +43,12 @@ class SwarmClient:
             async with session.post(api_url) as response:
                 return await response.json(), response.status
 
+    async def extend_batch(self, batch_id: str, amount: int):
+        api_url = urljoin(self.server_url, f"stamps/topup/{batch_id}/{amount}")
+        async with aiohttp.ClientSession() as session:
+            async with session.patch(api_url) as response:
+                return await response.json(), response.status
+
     async def get_batch_info(self, batch_id: str):
         api_url = urljoin(self.server_url, f"stamps/{batch_id}")
         async with aiohttp.ClientSession() as session:
