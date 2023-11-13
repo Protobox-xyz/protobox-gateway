@@ -23,12 +23,12 @@ async def get_client():
     )
 
 
-async def bucket_ls(bucket_name: str):
+async def handle_bucket_ls(bucket_name: str):
     client = await get_client()
     print(client.list_objects(Bucket=bucket_name))
 
 
-async def download_object(bucket_name: str, key: str, dst_folder: str):
+async def handle_download_object(bucket_name: str, key: str, dst_folder: str):
     client = await get_client()
     data = client.get_object(Bucket=bucket_name, Key=key)
     file_path = os.path.join(dst_folder, key)
@@ -40,11 +40,11 @@ async def download_object(bucket_name: str, key: str, dst_folder: str):
         file.write(data["Body"].read())
 
 
-async def upload_folder(path: str, bucket_name: str):
+async def handle_upload_folder(path: str, bucket_name: str):
     client = await get_client()
     for root, dirs, file in os.walk(path):
         for f in file:
-            key = os.path.relpath(os.path.join(root, f))
+            key = os.path.relpath(os.path.join(root, f), start=path)
             file_path = os.path.abspath(os.path.join(root, f))
             with open(file_path, "rb") as file:
                 bytes = file.read()
@@ -71,18 +71,18 @@ async def main():
     download.set_defaults(which="download")
 
     # upload the directory
-    upload = subparses.add_parser("upload", help="upload the directory or file in bucket")
-    upload.add_argument("-b", "--bucket", help="bucket name of your user", required=True)
-    upload.add_argument("-root", "--root", help="local folder or file path", default="")
-    upload.set_defaults(which="upload")
+    upload_folder = subparses.add_parser("upload_folder", help="upload the directory or file in bucket")
+    upload_folder.add_argument("-b", "--bucket", help="bucket name of your user", required=True)
+    upload_folder.add_argument("-dir", "--directory", help="local folder or file path", default="")
+    upload_folder.set_defaults(which="upload_folder")
 
     args = parser.parse_args()
     if args.which == "ls":
-        await bucket_ls(bucket_name=args.bucket)
+        await handle_bucket_ls(bucket_name=args.bucket)
     elif args.which == "download":
-        await download_object(bucket_name=args.bucket, key=args.key, dst_folder=args.destination)
-    elif args.which == "upload":
-        await upload_folder(bucket_name=args.bucket, path=args.root)
+        await handle_download_object(bucket_name=args.bucket, key=args.key, dst_folder=args.destination)
+    elif args.which == "upload_folder":
+        await handle_upload_folder(bucket_name=args.bucket, path=args.directory)
 
 
 if __name__ == "__main__":
