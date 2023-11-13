@@ -24,7 +24,10 @@ async def handle_create_object(
     request: Request,
     auth: Auth = Depends(extract_aws_token),
 ):
-    await create_bucket(bucket=bucket, key=key, request=request, owner=auth.batch_id)
+    bucket_info = MONGODB.buckets.find_one({"Name": bucket, "Owner": auth.batch_id})
+    if not bucket_info:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="invalid bucket owner")
+    await create_bucket(bucket=bucket_info["_id"], key=key, request=request, owner=auth.batch_id)
 
     content = dicttoxml({}, attr_type=False, custom_root="CreateBucketConfiguration")
     return Response(content=content, media_type="application/xml")
