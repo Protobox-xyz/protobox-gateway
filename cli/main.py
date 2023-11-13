@@ -1,7 +1,9 @@
+from pathlib import Path
 import asyncio
 import argparse
 
 import boto3
+import os
 
 ENDPOINT_URL = "http://localhost:8000/"
 BATCH_ID = "b00b92417dd7d5c379dba70afd4f986675e05df2635beab6ff2a6eb6eb8b2208"
@@ -26,6 +28,18 @@ async def bucket_ls(bucket_name: str):
     print(client.list_objects(Bucket=bucket_name))
 
 
+async def download_object(bucket_name: str, key: str, dst_folder: str):
+    client = await get_client()
+    data = client.get_object(Bucket=bucket_name, Key=key)
+    file_path = os.path.join(dst_folder, key)
+
+    # Get the directory of the file
+    directory = os.path.dirname(file_path)
+    Path(directory).mkdir(parents=True, exist_ok=True)
+    with open(file_path, "wb") as file:
+        file.write(data["Body"].read())
+
+
 async def main():
     """
     Command line parser that acts on the command passed to it
@@ -34,13 +48,22 @@ async def main():
     subparses = parser.add_subparsers()
 
     # keys generation functionality
-    keys = subparses.add_parser("ls", help="create n validator keys")
-    keys.add_argument("-b", "--bucket", help="bucket name of your user", required=True)
-    keys.set_defaults(which="ls")
+    ls = subparses.add_parser("ls", help="create n validator keys")
+    ls.add_argument("-b", "--bucket", help="bucket name of your user", required=True)
+    ls.set_defaults(which="ls")
+
+    # download file
+    download = subparses.add_parser("download", help="download the uploaded file")
+    download.add_argument("-b", "--bucket", help="bucket name of your user", required=True)
+    download.add_argument("-k", "--key", help="key of the object", required=True)
+    download.add_argument("-dst", "--destination", help="destination folder", default="")
+    download.set_defaults(which="download")
 
     args = parser.parse_args()
     if args.which == "ls":
         await bucket_ls(bucket_name=args.bucket)
+    elif args.which == "download":
+        await download_object(bucket_name=args.bucket, key=args.key, dst_folder=args.destination)
 
 
 if __name__ == "__main__":

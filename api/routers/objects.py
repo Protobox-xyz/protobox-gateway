@@ -1,7 +1,8 @@
 from xml.dom import minidom
 from dicttoxml import dicttoxml
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi import Query
+from starlette import status
 from starlette.requests import Request
 from starlette.responses import Response, StreamingResponse
 from swarm_sdk.sdk import SwarmClient
@@ -30,11 +31,11 @@ async def handle_create_object(
 
 
 @router.get("/{bucket}/{key:path}")
-async def get_object(
-    bucket: str,
-    key: str,
-):
-    data = MONGODB.objects.find_one({"_id": {"Bucket": bucket, "Key": key}})
+async def get_object(bucket: str, key: str, auth: Auth = Depends(extract_aws_token)):
+    bucket_info = MONGODB.buckets.find_one({"Name": bucket, "Owner": auth.batch_id})
+    if not bucket_info:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="invalid bucket owner")
+    data = MONGODB.objects.find_one({"_id": {"Bucket": bucket_info["_id"], "Key": key}})
     if not data:
         return Response(status_code=404)
     swarm_client = SwarmClient(server_url=data["SwarmData"]["SwarmServerUrl"])
