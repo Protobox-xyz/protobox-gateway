@@ -146,8 +146,8 @@ async def main():
     migrate = subparses.add_parser("migrate", help="upload the directory or file from s3 bucket")
     migrate.add_argument("-b", "--bucket", help="s3 bucket", required=True)
     migrate.add_argument("-k", "--key", help="s3 bucket", required=True)
-    migrate.add_argument("-aws_key_id", "--aws_key_id", help="s3 bucket", default=None)
-    migrate.add_argument("-aws_secret_key", "--aws_secret_key", help="s3 bucket", default=None)
+    migrate.add_argument("--aws_key_id", help="s3 bucket", default=None)
+    migrate.add_argument("--aws_secret_key", help="s3 bucket", default=None)
     migrate.set_defaults(which="migrate")
 
     # create bucket
