@@ -53,6 +53,7 @@ async def handle_bucket_ls(bucket_name: str, prefix: str):
         print(client.list_objects(Bucket=bucket_name, Prefix=prefix))
     except botocore.exceptions.ClientError as e:
         print(e, file=sys.stderr)
+        return
 
 
 async def handle_download_object(bucket_name: str, key: str, dst_folder: str):
@@ -61,6 +62,7 @@ async def handle_download_object(bucket_name: str, key: str, dst_folder: str):
         data = client.get_object(Bucket=bucket_name, Key=key)
     except botocore.exceptions.ClientError as e:
         print(e, file=sys.stderr)
+        return
 
     file_path = os.path.join(dst_folder, key)
     # Get the directory of the file
@@ -82,6 +84,7 @@ async def handle_upload_folder(path: str, bucket_name: str):
                     client.put_object(Bucket=bucket_name, Key=key, Body=bytes_data)
                 except botocore.exceptions.ClientError as e:
                     print(e, file=sys.stderr)
+                    return
 
 
 async def handle_upload_from_s3(bucket_name: str, key: str, aws_secret_id: str, aws_secret_key: str):
@@ -105,6 +108,7 @@ async def handle_upload_from_s3(bucket_name: str, key: str, aws_secret_id: str, 
             protobox_client.put_object(Bucket=bucket_name, Key=content["Key"], Body=bytes_data)
         except botocore.exceptions.ClientError as e:
             print(e, file=sys.stderr)
+            return
 
 
 async def handle_create_bucket(bucket_name: str):
