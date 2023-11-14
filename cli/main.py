@@ -6,28 +6,27 @@ import boto3
 import os
 
 import botocore
+import json
 import sys
-
-ENDPOINT_URL = "http://localhost:8000/"
-
 
 # aws_access_key_id="AKIA3OCMC5JRADEQ5H7H",
 # aws_secret_access_key="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")
 
 
-async def extract_token():
-    with open(f"{Path.home()}/.protobox/authorization.txt", "r") as file:
-        token = file.read()
-        return token
+async def extract_credentials():
+    with open(f"{Path.home()}/.protobox/authorization.json", "r") as file:
+        content = file.read()
+        data = json.loads(content)
+        return data["token"], data["endpoint"]
 
 
 async def get_client():
-    token = await extract_token()
+    token, endpoint = await extract_credentials()
     session = boto3.session.Session()
 
     return session.client(
         "s3",
-        endpoint_url=ENDPOINT_URL,
+        endpoint_url=endpoint,
         aws_session_token=token,
         aws_secret_access_key=token,
         aws_access_key_id=token,
@@ -38,11 +37,11 @@ async def get_aws_client(secret_key_id: str, secret_key: str):
     return boto3.client("s3", aws_access_key_id=secret_key_id, aws_secret_access_key=secret_key)
 
 
-async def handle_authorize(batch_id: str, signature: str):
+async def handle_authorize(endpoint: str, batch_id: str, signature: str):
     token = f"{batch_id}/{signature}"
     Path(f"{Path.home()}/.protobox").mkdir(parents=True, exist_ok=True)
-    with open(f"{Path.home()}/.protobox/authorization.txt", "w") as file:
-        file.write(token)
+    with open(f"{Path.home()}/.protobox/authorization.json", "w") as file:
+        json.dump({"token": token, "endpoint": endpoint}, file)
 
     print(f"Credentials was saved in {Path.home()}/.protobox")
 
@@ -155,6 +154,7 @@ async def main():
     # authorize command
     authorize = subparses.add_parser("authorize", help="authorize command")
     authorize.add_argument("-b", "--batch", help="batch id of the swarm", required=True)
+    authorize.add_argument("-e", "--endpoint", help="endpoint of the protobox", required=True)
     authorize.add_argument(
         "-sig", "--signature", help="specific signature generated to authorize on protobox", required=True
     )
@@ -168,7 +168,7 @@ async def main():
     elif args.which == "upload_folder":
         await handle_upload_folder(bucket_name=args.bucket, path=args.directory)
     elif args.which == "authorize":
-        await handle_authorize(batch_id=args.batch, signature=args.signature)
+        await handle_authorize(endpoint=args.endpoint, batch_id=args.batch, signature=args.signature)
     elif args.which == "create_bucket":
         await handle_create_bucket(bucket_name=args.bucket)
     elif args.which == "upload_from_s3":
