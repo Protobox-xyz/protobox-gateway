@@ -47,8 +47,8 @@ async def handle_upload_folder(path: str, bucket_name: str):
             key = os.path.relpath(os.path.join(root, f), start=path)
             file_path = os.path.abspath(os.path.join(root, f))
             with open(file_path, "rb") as file:
-                bytes = file.read()
-                client.put_object(Bucket=bucket_name, Key=key, Body=bytes)
+                bytes_data = file.read()
+                client.put_object(Bucket=bucket_name, Key=key, Body=bytes_data)
 
 
 async def main():
