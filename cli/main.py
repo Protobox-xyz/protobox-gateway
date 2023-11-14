@@ -8,7 +8,6 @@ import os
 import botocore
 
 ENDPOINT_URL = "http://localhost:8000/"
-BATCH_ID = "b00b92417dd7d5c379dba70afd4f986675e05df2635beab6ff2a6eb6eb8b2208"
 
 
 # aws_access_key_id="AKIA3OCMC5JRADEQ5H7H",
