@@ -6,6 +6,7 @@ import boto3
 import os
 
 import botocore
+import sys
 
 ENDPOINT_URL = "http://localhost:8000/"
 
@@ -52,7 +53,7 @@ async def handle_bucket_ls(bucket_name: str, prefix: str):
     try:
         print(client.list_objects(Bucket=bucket_name, Prefix=prefix))
     except botocore.exceptions.ClientError as e:
-        print(e)
+        print(e, file=sys.stderr)
 
 
 async def handle_download_object(bucket_name: str, key: str, dst_folder: str):
@@ -60,7 +61,7 @@ async def handle_download_object(bucket_name: str, key: str, dst_folder: str):
     try:
         data = client.get_object(Bucket=bucket_name, Key=key)
     except botocore.exceptions.ClientError as e:
-        print(e)
+        print(e, file=sys.stderr)
 
     file_path = os.path.join(dst_folder, key)
     # Get the directory of the file
@@ -81,13 +82,18 @@ async def handle_upload_folder(path: str, bucket_name: str):
                 try:
                     client.put_object(Bucket=bucket_name, Key=key, Body=bytes_data)
                 except botocore.exceptions.ClientError as e:
-                    print(e)
+                    print(e, file=sys.stderr)
 
 
 async def handle_upload_from_s3(bucket_name: str, key: str, aws_secret_id: str, aws_secret_key: str):
     protobox_client = await get_client()
     aws_client = await get_aws_client(aws_secret_id, aws_secret_key)
-    data = aws_client.list_objects(Bucket=bucket_name, Prefix=key)
+
+    try:
+        data = aws_client.list_objects(Bucket=bucket_name, Prefix=key)
+    except Exception as e:
+        print(e, file=sys.stderr)
+        return
 
     contents = data["Contents"]
     for content in contents:
@@ -99,7 +105,7 @@ async def handle_upload_from_s3(bucket_name: str, key: str, aws_secret_id: str, 
             bytes_data = object_data["Body"].read()
             protobox_client.put_object(Bucket=bucket_name, Key=content["Key"], Body=bytes_data)
         except botocore.exceptions.ClientError as e:
-            print(e)
+            print(e, file=sys.stderr)
 
 
 async def handle_create_bucket(bucket_name: str):
