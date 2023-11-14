@@ -139,12 +139,12 @@ async def main():
     upload_folder.set_defaults(which="upload_folder")
 
     # upload the directory
-    upload_from_s3 = subparses.add_parser("upload_from_s3", help="upload the directory or file from s3 bucket")
-    upload_from_s3.add_argument("-b", "--bucket", help="s3 bucket", required=True)
-    upload_from_s3.add_argument("-k", "--key", help="s3 bucket", required=True)
-    upload_from_s3.add_argument("-aws_key_id", "--aws_key_id", help="s3 bucket", default=None)
-    upload_from_s3.add_argument("-aws_secret_key", "--aws_secret_key", help="s3 bucket", default=None)
-    upload_from_s3.set_defaults(which="upload_from_s3")
+    migrate = subparses.add_parser("migrate", help="upload the directory or file from s3 bucket")
+    migrate.add_argument("-b", "--bucket", help="s3 bucket", required=True)
+    migrate.add_argument("-k", "--key", help="s3 bucket", required=True)
+    migrate.add_argument("-aws_key_id", "--aws_key_id", help="s3 bucket", default=None)
+    migrate.add_argument("-aws_secret_key", "--aws_secret_key", help="s3 bucket", default=None)
+    migrate.set_defaults(which="migrate")
 
     # create bucket
     create_bucket = subparses.add_parser("create_bucket", help="upload the directory or file in bucket")
@@ -171,7 +171,7 @@ async def main():
         await handle_authorize(endpoint=args.endpoint, batch_id=args.batch, signature=args.signature)
     elif args.which == "create_bucket":
         await handle_create_bucket(bucket_name=args.bucket)
-    elif args.which == "upload_from_s3":
+    elif args.which == "migrate":
         await handle_upload_from_s3(
             bucket_name=args.bucket, key=args.key, aws_secret_key=args.aws_secret_key, aws_secret_id=args.aws_key_id
         )
