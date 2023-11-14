@@ -137,8 +137,8 @@ async def main():
     upload_from_s3 = subparses.add_parser("upload_from_s3", help="upload the directory or file from s3 bucket")
     upload_from_s3.add_argument("-b", "--bucket", help="s3 bucket", required=True)
     upload_from_s3.add_argument("-k", "--key", help="s3 bucket", required=True)
-    upload_from_s3.add_argument("-aws_key_id", "--aws_key_id", help="s3 bucket", required=True)
-    upload_from_s3.add_argument("-aws_secret_key", "--aws_secret_key", help="s3 bucket", required=True)
+    upload_from_s3.add_argument("-aws_key_id", "--aws_key_id", help="s3 bucket", default=None)
+    upload_from_s3.add_argument("-aws_secret_key", "--aws_secret_key", help="s3 bucket", default=None)
     upload_from_s3.set_defaults(which="upload_from_s3")
 
     # create bucket
