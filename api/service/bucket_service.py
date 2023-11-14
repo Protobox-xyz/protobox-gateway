@@ -86,6 +86,19 @@ async def get_owner_objects(bucket_id, owner_address, prefix=""):
     return await filter_prefixes(prefix, objects)
 
 
+async def get_owner_objects_s3(bucket, owner_address, skip: int, limit: int, prefix=""):
+    bucket_info = MONGODB.buckets.find_one({"Name": bucket, "Owner": owner_address})
+    if not bucket_info:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="invalid bucket owner")
+
+    query = {"Bucket": bucket_info["_id"]}
+    if prefix != "":
+        query["Key"] = {"$regex": f"^{prefix}"}
+
+    objects = list(MONGODB.objects.find(query, {"_id": 0, "Content": 0}, skip=skip, limit=limit))
+    return objects
+
+
 def get_owner_data(owner):
     return {"ID": owner, "DisplayName": owner}
 

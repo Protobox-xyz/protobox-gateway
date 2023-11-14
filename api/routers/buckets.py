@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime
+from uuid import uuid4
 
 from dicttoxml import dicttoxml
 from fastapi import APIRouter, Depends
@@ -29,7 +30,9 @@ def create_bucket(
     auth: Auth = Depends(extract_aws_token),
 ):
     logging.warning(f"Creating bucket {bucket}")
-    MONGODB.buckets.insert_one({"_id": bucket, "Name": bucket, "Owner": auth.batch_id, "CreationDate": datetime.now()})
+    MONGODB.buckets.insert_one(
+        {"_id": uuid4().hex, "Name": bucket, "Owner": auth.batch_id, "CreationDate": datetime.now()}
+    )
     content = dicttoxml({}, attr_type=False, custom_root="CreateBucketConfiguration")
     return Response(content=content, media_type="application/xml")
 
@@ -42,7 +45,7 @@ def delete_bucket(
     logging.warning(f"Deleting bucket {bucket}")
     MONGODB.buckets.delete_one(
         {
-            "_id": bucket,
+            "Name": bucket,
             "Owner": auth.batch_id,
         }
     )
