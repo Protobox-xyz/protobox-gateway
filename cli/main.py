@@ -9,9 +9,6 @@ import botocore
 import json
 import sys
 
-# aws_access_key_id="AKIA3OCMC5JRADEQ5H7H",
-# aws_secret_access_key="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")
-
 
 async def extract_credentials():
     with open(f"{Path.home()}/.protobox/authorization.json", "r") as file:
