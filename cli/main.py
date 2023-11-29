@@ -34,8 +34,8 @@ async def get_aws_client(secret_key_id: str, secret_key: str):
     return boto3.client("s3", aws_access_key_id=secret_key_id, aws_secret_access_key=secret_key)
 
 
-async def handle_authorize(endpoint: str, batch_id: str, signature: str):
-    token = f"{batch_id}/{signature}"
+async def handle_authorize(endpoint: str, batch_id: str, signature: str, application: str):
+    token = f"{batch_id}/{signature}/{application}"
     Path(f"{Path.home()}/.protobox").mkdir(parents=True, exist_ok=True)
     with open(f"{Path.home()}/.protobox/authorization.json", "w") as file:
         json.dump({"token": token, "endpoint": endpoint}, file)
@@ -45,7 +45,6 @@ async def handle_authorize(endpoint: str, batch_id: str, signature: str):
 
 async def handle_bucket_ls(bucket_name: str, prefix: str):
     client = await get_client()
-
     try:
         print(client.list_objects(Bucket=bucket_name, Prefix=prefix))
     except botocore.exceptions.ClientError as e:
@@ -156,6 +155,7 @@ async def main():
     authorize = subparses.add_parser("authorize", help="authorize command")
     authorize.add_argument("-b", "--batch", help="batch id of the swarm", required=True)
     authorize.add_argument("-e", "--endpoint", help="endpoint of the protobox", required=True)
+    authorize.add_argument("-a", "--application", help="application", required=True)
     authorize.add_argument(
         "-sig", "--signature", help="specific signature generated to authorize on protobox", required=True
     )
@@ -169,7 +169,9 @@ async def main():
     elif args.which == "upload_folder":
         await handle_upload_folder(bucket_name=args.bucket, path=args.directory)
     elif args.which == "authorize":
-        await handle_authorize(endpoint=args.endpoint, batch_id=args.batch, signature=args.signature)
+        await handle_authorize(
+            endpoint=args.endpoint, batch_id=args.batch, signature=args.signature, application=args.application
+        )
     elif args.which == "create_bucket":
         await handle_create_bucket(bucket_name=args.bucket)
     elif args.which == "migrate":

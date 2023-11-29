@@ -44,19 +44,21 @@ async def extract_aws_token(
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing token")
 
     try:
-        batch_id, signature = token.split("/")
+        batch_id, signature, application = token.split("/")
         result, owner_address = await verify_signature(signature, SING_IN_MESSAGE)
     except Exception as e:
         logging.error(f"error while extracting auth {e}")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid signature")
 
     if not result:
+        logging.error(f"error in signature")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid signature")
 
     if not await is_owner(owner_address=owner_address, batch_id=batch_id):
+        logging.error(f"invalid owner")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="address is not the batch owner")
 
-    return Auth(batch_id=batch_id, owner_address=owner_address)
+    return Auth(batch_id=batch_id, owner_address=owner_address, application=application)
 
 
 async def extract_token(request: Request):

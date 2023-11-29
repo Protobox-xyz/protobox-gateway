@@ -26,7 +26,7 @@ async def handle_create_object(
     if not bucket_info or not await is_owner(owner_address, bucket_info["Owner"]):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="invalid bucket owner")
 
-    await create_bucket(bucket=bucket_id, key=key, request=request, owner=bucket_info["Owner"])
+    await create_bucket(bucket=bucket_id, key=key, request=request, owner=bucket_info["Owner"], application="Protobox")
 
 
 @router.get("/{key:path}")

@@ -8,13 +8,10 @@ from swarm_sdk.sdk import SwarmClient
 from settings import MONGODB, SWARM_SERVER_URL_BZZ
 
 
-async def create_bucket(
-    bucket: str,
-    key: str,
-    request: Request,
-    owner: str,
-):
+async def create_bucket(bucket: str, key: str, request: Request, owner: str, application: str):
     content_type = request.headers.get("Content-Type")
+    content_length = request.headers["content-length"]
+
     swarm_client = SwarmClient(batch_id=owner, server_url=SWARM_SERVER_URL_BZZ)
     swarm_upload_data = await swarm_client.upload(request.stream(), content_type=content_type, name=key)
     swarm_upload_data["SwarmServerUrl"] = SWARM_SERVER_URL_BZZ
@@ -30,6 +27,9 @@ async def create_bucket(
             "Owner": owner,
             "CreationDate": datetime.now(),
             "SwarmData": swarm_upload_data,
+            "content_type": content_type,
+            "content_length": content_length,
+            "application": application,
         },
         upsert=True,
     )
@@ -86,8 +86,8 @@ async def get_owner_objects(bucket_id, owner_address, prefix=""):
     return await filter_prefixes(prefix, objects)
 
 
-async def get_owner_objects_s3(bucket, owner_address, skip: int, limit: int, prefix=""):
-    bucket_info = MONGODB.buckets.find_one({"Name": bucket, "Owner": owner_address})
+async def get_owner_objects_s3(bucket, batch_id: str, skip: int, limit: int, prefix=""):
+    bucket_info = MONGODB.buckets.find_one({"Name": bucket, "Owner": batch_id})
     if not bucket_info:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="invalid bucket owner")
 
