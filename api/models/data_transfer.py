@@ -12,11 +12,11 @@ class Action(str, Enum):
 
 class DataTransfer(BaseModel):
     action: Action
-    application: str
-    batch_id: str
-    bucket_id: str
-    content_length: str
-    content_type: str
+    application: str | None
+    batch_id: str | None
+    bucket_id: str | None
+    content_length: str | None
+    content_type: str | None
     created_at: datetime
     updated_at: datetime
-    key: str
+    key: str | None

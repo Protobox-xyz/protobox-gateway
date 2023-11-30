@@ -15,11 +15,12 @@ async def create_bucket(bucket: str, key: str, request: Request, owner: str, app
     content_length = request.headers["content-length"]
 
     swarm_client = SwarmClient(batch_id=owner, server_url=SWARM_SERVER_URL_BZZ)
-    swarm_upload_data = await swarm_client.upload(request.stream(), content_type=content_type, name=key)
+    swarm_upload_data, status_code = await swarm_client.upload(request.stream(), content_type=content_type, name=key)
     swarm_upload_data["SwarmServerUrl"] = SWARM_SERVER_URL_BZZ
-    if swarm_upload_data["code"] != 200:
-        raise HTTPException(status_code=swarm_upload_data["code"], detail=swarm_upload_data["message"])
-    print(swarm_upload_data)
+    print(swarm_upload_data, status_code)
+
+    if status_code >= 300:
+        raise HTTPException(status_code=status_code, detail=swarm_upload_data["message"])
 
     MONGODB.objects.replace_one(
         {"_id": {"Bucket": bucket, "Key": key}},
