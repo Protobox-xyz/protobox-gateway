@@ -7,7 +7,7 @@ from starlette.requests import Request
 from starlette.responses import Response, StreamingResponse
 from swarm_sdk.sdk import SwarmClient
 
-from service.bucket_service import create_bucket, get_owner_objects_s3
+from service.bucket_service import create_bucket, get_owner_objects_s3, save_download_transfer
 
 from settings import MONGODB
 from utils.auth import extract_aws_token
@@ -44,6 +44,9 @@ async def get_object(bucket: str, key: str, auth: Auth = Depends(extract_aws_tok
     data = MONGODB.objects.find_one({"_id": {"Bucket": bucket_info["_id"], "Key": key}})
     if not data:
         return Response(status_code=404)
+
+    await save_download_transfer(data, bucket_info["_id"], auth.application, key, auth.batch_id)
+
     swarm_client = SwarmClient(server_url=data["SwarmData"]["SwarmServerUrl"])
     stream_content = swarm_client.download(data["SwarmData"]["reference"])
     return StreamingResponse(content=stream_content, media_type=data["content_type"])

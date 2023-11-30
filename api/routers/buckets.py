@@ -29,7 +29,7 @@ def create_bucket(
     bucket: str,
     auth: Auth = Depends(extract_aws_token),
 ):
-    logging.warning(f"Creating bucket {bucket}")
+    logging.info(f"Creating bucket {bucket}")
     MONGODB.buckets.insert_one(
         {"_id": uuid4().hex, "Name": bucket, "Owner": auth.batch_id, "CreationDate": datetime.now()}
     )

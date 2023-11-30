@@ -1,9 +1,11 @@
 from datetime import datetime
+from uuid import uuid4
 
 from fastapi import HTTPException
 from starlette import status
 from starlette.requests import Request
 
+from models.data_transfer import Action
 from swarm_sdk.sdk import SwarmClient
 from settings import MONGODB, SWARM_SERVER_URL_BZZ
 
@@ -32,6 +34,40 @@ async def create_bucket(bucket: str, key: str, request: Request, owner: str, app
             "application": application,
         },
         upsert=True,
+    )
+
+    now = datetime.utcnow()
+    MONGODB.data_transfer.insert_one(
+        {
+            "_id": uuid4().hex,
+            "action": Action.UPLOAD,
+            "batch_id": owner,
+            "application": application,
+            "bucket_id": bucket,
+            "content_length": content_length,
+            "content_type": content_type,
+            "key": key,
+            "updated_at": now,
+            "created_at": now,
+        }
+    )
+
+
+async def save_download_transfer(data, bucket_id: str, application: str, key: str, batch_id: str):
+    now = datetime.utcnow()
+    MONGODB.data_transfer.insert_one(
+        {
+            "_id": uuid4().hex,
+            "action": Action.DOWNLOAD,
+            "application": application,
+            "batch_id": batch_id,
+            "bucket_id": bucket_id,
+            "content_length": data["content_length"],
+            "content_type": data["content_type"],
+            "key": key,
+            "updated_at": now,
+            "created_at": now,
+        }
     )
 
 
