@@ -6,7 +6,7 @@ from starlette.responses import Response, StreamingResponse
 from models.bucket_json import ObjectResponse
 from swarm_sdk.sdk import SwarmClient
 
-from service.bucket_service import create_bucket, get_owner_objects, is_owner, get_object_data
+from service.bucket_service import create_bucket, get_owner_objects, is_owner, get_object_data, save_download_transfer
 
 from settings import MONGODB
 from utils.auth import extract_signature
@@ -36,6 +36,8 @@ async def get_object(
     owner_address=Depends(extract_signature),
 ):
     data = await get_object_data(bucket_id, key, owner_address)
+
+    await save_download_transfer(data, bucket_id, "Protobox", key, data["Owner"])
 
     swarm_client = SwarmClient(server_url=data["SwarmData"]["SwarmServerUrl"])
     stream_content = swarm_client.download(data["SwarmData"]["reference"])
