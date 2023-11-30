@@ -103,6 +103,8 @@ async def filter_prefixes(prefix: str, objects: list):
                 "Name": children[0],
                 "Folder": len(children) > 1,
                 "CreationDate": obj["CreationDate"],
+                "content_length": obj["content_length"],
+                "content_type": obj["content_type"],
             }
         )
         used_folder[child] = True
@@ -121,6 +123,7 @@ async def get_owner_objects(bucket_id, owner_address, prefix=""):
         query["Key"] = {"$regex": f"^{prefix}"}
 
     objects = list(MONGODB.objects.find(query, {"_id": 0, "Content": 0}))
+    print(objects)
     return await filter_prefixes(prefix, objects)
 
 

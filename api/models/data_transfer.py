@@ -15,8 +15,8 @@ class DataTransfer(BaseModel):
     application: str | None
     batch_id: str | None
     bucket_id: str | None
-    content_length: str | None
+    content_length: int | None
     content_type: str | None
+    key: str | None
     created_at: datetime
     updated_at: datetime
-    key: str | None
