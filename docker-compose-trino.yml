@@ -1,15 +1,15 @@
 version: "3.7"
 
 networks:
-  protobox-gateway-visualisation:
-    driver: bridge
+  protobox-network:
+    external: true
 
 services:
   trino:
     image: trinodb/trino:latest
     container_name: trino
     networks:
-      - protobox-gateway-visualisation
+      - protobox-network
     ports:
       - "8080:8080"
     volumes:
@@ -18,7 +18,7 @@ services:
     build: ./superset
     container_name: superset
     networks:
-      - protobox-gateway-visualisation
+      - protobox-network
     depends_on:
       - postgres
     ports:
@@ -31,7 +31,7 @@ services:
     image: postgres:16.1-alpine3.18
     container_name: postgres
     networks:
-      - protobox-gateway-visualisation
+      - protobox-network
     volumes:
       - ./.postgres:/var/lib/postgresql
       - ./.postgres/data:/var/lib/postgresql/data
