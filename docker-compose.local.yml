@@ -5,21 +5,21 @@ networks:
     driver: bridge
 
 services:
-  api:
-    container_name: protobox-gateway-api
-    image: protobox-gateway-api:0.1
-    ports:
-      - "127.0.0.1:8000:8000"
-    build:
-      context: ./api
-    networks:
-      - protobox-gateway-network
-    depends_on:
-      - bee
-      - mongo
-    restart: unless-stopped
-    env_file:
-      - .env
+#  api:
+#    container_name: protobox-gateway-api
+#    image: protobox-gateway-api:0.1
+#    ports:
+#      - "127.0.0.1:8000:8000"
+#    build:
+#      context: ./api
+#    networks:
+#      - protobox-gateway-network
+#    depends_on:
+#      - bee
+#      - mongo
+#    restart: unless-stopped
+#    env_file:
+#      - .env
   bee:
     image: ethersphere/bee:stable
     container_name: protobox-gateway-bee
@@ -34,7 +34,7 @@ services:
     command:
       - "start"
       - "--welcome-message='Bzzzz bzzz bzz bzz. 🐝'"
-      - '--blockchain-rpc-endpoint=https://muddy-dry-darkness.xdai.discover.quiknode.pro/13e54c30c96182a3fc65088ff47f7a3fc3231585/'
+      - '--blockchain-rpc-endpoint=https://nd-494-508-290.p2pify.com/b2752537b1e1fc7acb53ddcf9c2aac0c/'
       - "--debug-api-enable"
       - "--full-node"
       - "--swap-initial-deposit=0"
@@ -42,20 +42,20 @@ services:
       - "--network-id=1"
       - "--password=123"
       - "--mainnet"
-  fair_os:
-    image: fairdatasociety/fairos-dfs
-    container_name: protobox-fair-dfs
-    depends_on:
-      - bee
-    networks:
-      - protobox-gateway-network
-    ports:
-      - "9090:9090"
-    command:
-      - "server"
-      - "--rpc=https://fabled-soft-night.ethereum-sepolia.discover.quiknode.pro/7344d1fa27d12b5da5d0834e0ee2216ea97362b5/"
-      - "--beeApi=http://bee:1633"
-      - "--postageBlockId=0000000000000000000000000000000000000000000000000000000000000000"
+#  fair_os:
+#    image: fairdatasociety/fairos-dfs
+#    container_name: protobox-fair-dfs
+#    depends_on:
+#      - bee
+#    networks:
+#      - protobox-gateway-network
+#    ports:
+#      - "9090:9090"
+#    command:
+#      - "server"
+#      - "--rpc=https://fabled-soft-night.ethereum-sepolia.discover.quiknode.pro/7344d1fa27d12b5da5d0834e0ee2216ea97362b5/"
+#      - "--beeApi=http://bee:1633"
+#      - "--postageBlockId=0000000000000000000000000000000000000000000000000000000000000000"
   mongo:
     container_name: protobox-gateway-mongo
     image: mongo:7.0.0
@@ -66,6 +66,39 @@ services:
     volumes:
       - mongo-data:/data/db
     restart: unless-stopped
-
+  presto:
+    image: prestodb/presto:latest
+    container_name: presto
+    networks:
+      - protobox-gateway-network
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./presto/mongodb.properties:/opt/presto-server/etc/catalog/mongodb.properties
+  superset:
+    build: ./superset
+    container_name: superset
+    networks:
+      - protobox-gateway-network
+    depends_on:
+      - postgres
+    ports:
+      - "8088:8088"
+    volumes:
+      - ./superset/superset_config.py:/app/superset/superset_config.py
+    environment:
+      - SUPERSET_CONFIG_PATH=/app/superset/superset_config.py
+  postgres:
+    image: postgres:16.1-alpine3.18
+    container_name: postgres
+    networks:
+      - protobox-gateway-network
+    volumes:
+      - ./.postgres:/var/lib/postgresql
+      - ./.postgres/data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=superset
+      - POSTGRES_PASSWORD=superset
+      - POSTGRES_DB=superset
 volumes:
   mongo-data:

@@ -12,7 +12,7 @@ from settings import MONGODB, SWARM_SERVER_URL_BZZ
 
 async def create_bucket(bucket: str, key: str, request: Request, owner: str, application: str):
     content_type = request.headers.get("Content-Type")
-    content_length = request.headers["content-length"]
+    content_length = int(request.headers.get("content-length", 0))
 
     swarm_client = SwarmClient(batch_id=owner, server_url=SWARM_SERVER_URL_BZZ)
     swarm_upload_data, status_code = await swarm_client.upload(request.stream(), content_type=content_type, name=key)
@@ -64,7 +64,7 @@ async def save_download_transfer(data, bucket_id: str, application: str, key: st
             "application": application,
             "batch_id": batch_id,
             "bucket_id": bucket_id,
-            "content_length": data["content_length"],
+            "content_length": int(data["content_length"]),
             "content_type": data["content_type"],
             "key": key,
             "updated_at": now,
