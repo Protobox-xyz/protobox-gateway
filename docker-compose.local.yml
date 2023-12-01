@@ -66,15 +66,15 @@ services:
     volumes:
       - mongo-data:/data/db
     restart: unless-stopped
-  presto:
-    image: prestodb/presto:latest
-    container_name: presto
+  trino:
+    image: trinodb/trino:latest
+    container_name: trino
     networks:
       - protobox-gateway-network
     ports:
       - "8080:8080"
     volumes:
-      - ./presto/mongodb.properties:/opt/presto-server/etc/catalog/mongodb.properties
+      - ./trino/catalog:/etc/trino/catalog
   superset:
     build: ./superset
     container_name: superset
