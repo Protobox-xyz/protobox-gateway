@@ -8,6 +8,7 @@ from starlette.requests import Request
 from models.data_transfer import Action
 from swarm_sdk.sdk import SwarmClient
 from settings import MONGODB, SWARM_SERVER_URL_BZZ
+import logging
 
 
 async def create_bucket(bucket: str, key: str, request: Request, owner: str, application: str):
@@ -56,6 +57,7 @@ async def create_bucket(bucket: str, key: str, request: Request, owner: str, app
 
 
 async def save_download_transfer(data, bucket_id: str, application: str, key: str, batch_id: str):
+    logging.info("Saving download data transfer")
     now = datetime.utcnow()
     MONGODB.data_transfer.insert_one(
         {
