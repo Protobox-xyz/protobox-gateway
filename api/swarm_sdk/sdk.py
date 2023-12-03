@@ -34,8 +34,7 @@ class SwarmClient:
         api_url = self.generate_api_url()
         async with aiohttp.ClientSession() as session:
             async with session.post(api_url, params={"name": name}, headers=headers, data=stream) as response:
-                response.raise_for_status()
-                return await response.json()
+                return await response.json(), response.status
 
     async def create_batch(self, amount: int, depth: int, label: str):
         api_url = urljoin(self.server_url, f"stamps/{amount}/{depth}?label={label}")

@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional
 
 
@@ -21,3 +21,5 @@ class ObjectResponse(BaseModel):
     Name: str
     CreationDate: Optional[datetime] = None
     Folder: bool
+    content_type: str | None = Field(None)
+    content_length: int | None = Field(None)

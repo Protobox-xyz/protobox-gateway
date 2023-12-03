@@ -1,25 +1,26 @@
 from datetime import datetime
+from uuid import uuid4
 
 from fastapi import HTTPException
 from starlette import status
 from starlette.requests import Request
 
+from models.data_transfer import Action
 from swarm_sdk.sdk import SwarmClient
 from settings import MONGODB, SWARM_SERVER_URL_BZZ
 
 
-async def create_bucket(
-    bucket: str,
-    key: str,
-    request: Request,
-    owner: str,
-):
+async def create_bucket(bucket: str, key: str, request: Request, owner: str, application: str):
     content_type = request.headers.get("Content-Type")
-    swarm_client = SwarmClient(batch_id=owner, server_url=SWARM_SERVER_URL_BZZ)
-    swarm_upload_data = await swarm_client.upload(request.stream(), content_type=content_type, name=key)
-    swarm_upload_data["SwarmServerUrl"] = SWARM_SERVER_URL_BZZ
+    content_length = int(request.headers.get("content-length", 0))
 
-    print(swarm_upload_data)
+    swarm_client = SwarmClient(batch_id=owner, server_url=SWARM_SERVER_URL_BZZ)
+    swarm_upload_data, status_code = await swarm_client.upload(request.stream(), content_type=content_type, name=key)
+    swarm_upload_data["SwarmServerUrl"] = SWARM_SERVER_URL_BZZ
+    print(swarm_upload_data, status_code)
+
+    if status_code >= 300:
+        raise HTTPException(status_code=status_code, detail=swarm_upload_data["message"])
 
     MONGODB.objects.replace_one(
         {"_id": {"Bucket": bucket, "Key": key}},
@@ -30,8 +31,45 @@ async def create_bucket(
             "Owner": owner,
             "CreationDate": datetime.now(),
             "SwarmData": swarm_upload_data,
+            "content_type": content_type,
+            "content_length": content_length,
+            "application": application,
         },
         upsert=True,
+    )
+
+    now = datetime.utcnow()
+    MONGODB.data_transfer.insert_one(
+        {
+            "_id": uuid4().hex,
+            "action": Action.UPLOAD,
+            "batch_id": owner,
+            "application": application,
+            "bucket_id": bucket,
+            "content_length": content_length,
+            "content_type": content_type,
+            "key": key,
+            "updated_at": now,
+            "created_at": now,
+        }
+    )
+
+
+async def save_download_transfer(data, bucket_id: str, application: str, key: str, batch_id: str):
+    now = datetime.utcnow()
+    MONGODB.data_transfer.insert_one(
+        {
+            "_id": uuid4().hex,
+            "action": Action.DOWNLOAD,
+            "application": application,
+            "batch_id": batch_id,
+            "bucket_id": bucket_id,
+            "content_length": int(data["content_length"]),
+            "content_type": data["content_type"],
+            "key": key,
+            "updated_at": now,
+            "created_at": now,
+        }
     )
 
 
@@ -65,6 +103,8 @@ async def filter_prefixes(prefix: str, objects: list):
                 "Name": children[0],
                 "Folder": len(children) > 1,
                 "CreationDate": obj["CreationDate"],
+                "content_length": obj["content_length"],
+                "content_type": obj["content_type"],
             }
         )
         used_folder[child] = True
@@ -83,11 +123,12 @@ async def get_owner_objects(bucket_id, owner_address, prefix=""):
         query["Key"] = {"$regex": f"^{prefix}"}
 
     objects = list(MONGODB.objects.find(query, {"_id": 0, "Content": 0}))
+    print(objects)
     return await filter_prefixes(prefix, objects)
 
 
-async def get_owner_objects_s3(bucket, owner_address, skip: int, limit: int, prefix=""):
-    bucket_info = MONGODB.buckets.find_one({"Name": bucket, "Owner": owner_address})
+async def get_owner_objects_s3(bucket, batch_id: str, skip: int, limit: int, prefix=""):
+    bucket_info = MONGODB.buckets.find_one({"Name": bucket, "Owner": batch_id})
     if not bucket_info:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="invalid bucket owner")
 

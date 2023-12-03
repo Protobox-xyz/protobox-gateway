@@ -1,0 +1,41 @@
+version: "3.7"
+
+networks:
+  protobox-network:
+    external: true
+
+services:
+  trino:
+    image: trinodb/trino:latest
+    container_name: trino
+    networks:
+      - protobox-network
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./trino/catalog:/etc/trino/catalog
+  superset:
+    build: ./superset
+    container_name: superset
+    networks:
+      - protobox-network
+    depends_on:
+      - postgres
+    ports:
+      - "8088:8088"
+    volumes:
+      - ./superset/superset_config.py:/app/superset/superset_config.py
+    environment:
+      - SUPERSET_CONFIG_PATH=/app/superset/superset_config.py
+  postgres:
+    image: postgres:16.1-alpine3.18
+    container_name: postgres
+    networks:
+      - protobox-network
+    volumes:
+      - ./.postgres:/var/lib/postgresql
+      - ./.postgres/data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=superset
+      - POSTGRES_PASSWORD=superset
+      - POSTGRES_DB=superset
