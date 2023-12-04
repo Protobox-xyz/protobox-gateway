@@ -33,9 +33,8 @@ async def handle_create_object(
 async def get_object(
     bucket_id: str,
     key: str,
-    owner_address=Depends(extract_signature),
 ):
-    data = await get_object_data(bucket_id, key, owner_address)
+    data = await get_object_data(bucket_id, key)
 
     await save_download_transfer(data, bucket_id, "Protobox", key, data["Owner"])
 
@@ -48,9 +47,8 @@ async def get_object(
 async def head_object(
     bucket_id: str,
     key: str,
-    owner_address=Depends(extract_signature),
 ):
-    await get_object_data(bucket_id, key, owner_address)
+    await get_object_data(bucket_id, key)
 
     return Response(status_code=200)
 
