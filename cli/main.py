@@ -8,6 +8,7 @@ import os
 import botocore
 import json
 import sys
+import magic
 
 
 async def extract_credentials():
@@ -76,8 +77,9 @@ async def handle_upload_folder(path: str, bucket_name: str):
             file_path = os.path.abspath(os.path.join(root, f))
             with open(file_path, "rb") as file:
                 bytes_data = file.read()
+                content_type = magic.from_file(file_path, mime=True)
                 try:
-                    client.put_object(Bucket=bucket_name, Key=key, Body=bytes_data)
+                    client.put_object(Bucket=bucket_name, Key=key, Body=bytes_data, ContentType=content_type)
                 except botocore.exceptions.ClientError as e:
                     print(e, file=sys.stderr)
                     return
@@ -135,7 +137,7 @@ async def main():
     # upload the directory
     upload_folder = subparses.add_parser("upload_folder", help="upload the directory or file in bucket")
     upload_folder.add_argument("-b", "--bucket", help="bucket name of your user", required=True)
-    upload_folder.add_argument("-dir", "--directory", help="local folder or file path", default="")
+    upload_folder.add_argument("-dir", "--directory", help="local folder or file path", default=".")
     upload_folder.set_defaults(which="upload_folder")
 
     # upload the directory

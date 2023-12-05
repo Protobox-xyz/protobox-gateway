@@ -1,0 +1,2 @@
+python-magic
+boto3==1.26.89
