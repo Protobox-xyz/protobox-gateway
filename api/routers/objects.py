@@ -98,7 +98,9 @@ async def list_objects(
         xml.lastChild.appendChild(root.createElement("LastModified")).appendChild(
             root.createTextNode(obj["CreationDate"].isoformat())
         )
-        xml.lastChild.appendChild(root.createElement("Size")).appendChild(root.createTextNode(obj["content_length"]))
+        xml.lastChild.appendChild(root.createElement("Size")).appendChild(
+            str(root.createTextNode(obj["content_length"]))
+        )
 
     counter += 1
     if counter == max_keys:
