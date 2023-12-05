@@ -99,7 +99,7 @@ async def list_objects(
             root.createTextNode(obj["CreationDate"].isoformat())
         )
         xml.lastChild.appendChild(root.createElement("Size")).appendChild(
-            str(root.createTextNode(obj["content_length"]))
+            root.createTextNode(str(obj["content_length"]))
         )
 
     counter += 1
