@@ -15,3 +15,26 @@ services:
     restart: unless-stopped
     env_file:
       - .env
+
+  bee:
+    image: ethersphere/bee:stable
+    container_name: protobox-bee
+    networks:
+      - protobox-network
+    volumes:
+      - ./bee/.bee:/home/bee/.bee
+    ports:
+      - "1633:1633"
+      - "1634:1634"
+      - "1635:1635"
+    command:
+      - "start"
+      - "--welcome-message='Bzzzz bzzz bzz bzz. 🐝'"
+      - '--blockchain-rpc-endpoint=https://nd-494-508-290.p2pify.com/b2752537b1e1fc7acb53ddcf9c2aac0c/'
+      - "--debug-api-enable"
+      - "--full-node"
+      - "--swap-initial-deposit=0"
+      - "--tracing-enable"
+      - "--network-id=1"
+      - "--password=123"
+      - "--mainnet"
