@@ -114,7 +114,7 @@ async def get_batch_info(batch_id):
     swarm_client = SwarmClient(batch_id=batch_id, server_url=SWARM_SERVER_URL_STAMP)
     info, status = await swarm_client.get_batch_info(batch_id)
     if status != 200:
-        return []
+        return None
     return info
 
 
