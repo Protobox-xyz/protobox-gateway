@@ -6,7 +6,7 @@ from settings import SWARM_SERVER_URL_STAMP, MONGODB, ERC20_ABI, BZZ_COIN_ADDRES
 from swarm_sdk.sdk import SwarmClient
 from service.blockchain_service import WEB3, sign_transaction
 
-bzz_contract = WEB3.eth.contract(address=BZZ_COIN_ADDRESS, abi=ERC20_ABI)
+bzz_contract = WEB3.eth.contract(address=WEB3.to_checksum_address(BZZ_COIN_ADDRESS), abi=ERC20_ABI)
 
 
 async def get_bee_ethereum_address():
