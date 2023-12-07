@@ -112,7 +112,10 @@ async def extend_batch_task(task_id: str, batch_id: str, owner: str, batch: Batc
 
 async def get_batch_info(batch_id):
     swarm_client = SwarmClient(batch_id=batch_id, server_url=SWARM_SERVER_URL_STAMP)
-    return await swarm_client.get_batch_info(batch_id)
+    info, status = await swarm_client.get_batch_info(batch_id)
+    if status != 200:
+        return []
+    return info
 
 
 async def get_owner_batches(owner):
