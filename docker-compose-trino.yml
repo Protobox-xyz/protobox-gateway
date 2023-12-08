@@ -47,8 +47,6 @@ services:
     restart: unless-stopped
     environment:
       REACT_APP_DASHBOARD_ID: ${REACT_APP_DASHBOARD_ID}
-    ports:
-      - "3000:3000"
     networks:
       - protobox-network
   livepeer:
@@ -59,7 +57,5 @@ services:
     restart: unless-stopped
     environment:
       REACT_APP_DASHBOARD_ID: ${REACT_APP_LIVEPEER_DASHBOARD_ID}
-    ports:
-      - "3000:3000"
     networks:
       - protobox-network

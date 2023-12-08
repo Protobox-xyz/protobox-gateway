@@ -7,8 +7,7 @@ function App() {
 
   async function fetchGuestToken() {
     // Fetch the guest token from your backend
-    console.log(`http://localhost:8000/api/superset/${process.env.REACT_APP_DASHBOARD_ID}`)
-    const response = await fetch(`http://localhost:8000/api/superset/${process.env.REACT_APP_DASHBOARD_ID}`);
+    const response = await fetch(`https://s3.protobox.xyz/api/superset/${process.env.REACT_APP_DASHBOARD_ID}`);
     const data = await response.json();
     console.log(data)
     return data.token;
