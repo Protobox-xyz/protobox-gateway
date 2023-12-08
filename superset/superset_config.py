@@ -12,3 +12,4 @@ CORS_OPTIONS = {
     "origins": ["http://localhost:8088", "http://localhost:8888"],
 }
 ENABLE_JAVASCRIPT_CONTROLS = True
+HTTP_HEADERS = {"X-Frame-Options": "Allow"}
