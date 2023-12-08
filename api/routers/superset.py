@@ -4,7 +4,7 @@ from settings import SUPERSET_PASS, SUPRESET_ADMIN
 
 router = APIRouter(prefix="/api/superset", tags=["superset"])
 
-SUPRESET_BASE = "https://stats.protobox.xyz"
+SUPRESET_BASE = "https://superset.protobox.xyz"
 
 
 def login():
