@@ -14,6 +14,10 @@ RPC_URL = os.environ.get("RPC_URL", "")
 
 SING_IN_MESSAGE = "Sign in to Protobox"
 
+SUPERSET_PASS = os.environ.get("SUPERSET_PASS", "admin")
+SUPRESET_ADMIN = os.environ.get("SUPRESET_ADMIN", "admin")
+
+
 ERC20_ABI = [
     {
         "inputs": [

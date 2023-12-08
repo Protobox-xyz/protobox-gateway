@@ -14,6 +14,7 @@ from routers.objects_json import router as objects_json_router
 from routers.bucket_json import router as bucket_json_router
 from routers.batch import router as batch_router
 from routers.data_transfer import router as data_transfer_router
+from routers.superset import router as superset_router
 from dotenv import load_dotenv
 
 
@@ -22,6 +23,7 @@ app = FastAPI(title="Protobox API", docs_url="/api/docs", openapi_url="/api/open
 # Load .env file
 load_dotenv()
 
+app.include_router(superset_router)
 app.include_router(data_transfer_router)
 app.include_router(batch_router)
 app.include_router(bucket_json_router)
