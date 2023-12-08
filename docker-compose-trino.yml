@@ -39,3 +39,27 @@ services:
       - POSTGRES_USER=superset
       - POSTGRES_PASSWORD=superset
       - POSTGRES_DB=superset
+  stats:
+    container_name: protobox-stats
+    image: protobox-stats
+    build:
+      context: ./stats
+    restart: unless-stopped
+    environment:
+      REACT_APP_DASHBOARD_ID: ${REACT_APP_DASHBOARD_ID}
+    ports:
+      - "3000:3000"
+    networks:
+      - protobox-network
+  livepeer:
+    container_name: livepeer-stats
+    image: livepeer-stats
+    build:
+      context: ./stats
+    restart: unless-stopped
+    environment:
+      REACT_APP_DASHBOARD_ID: ${REACT_APP_LIVEPEER_DASHBOARD_ID}
+    ports:
+      - "3000:3000"
+    networks:
+      - protobox-network

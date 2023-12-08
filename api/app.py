@@ -16,9 +16,20 @@ from routers.batch import router as batch_router
 from routers.data_transfer import router as data_transfer_router
 from routers.superset import router as superset_router
 from dotenv import load_dotenv
+from fastapi.middleware.cors import CORSMiddleware
 
 
 app = FastAPI(title="Protobox API", docs_url="/api/docs", openapi_url="/api/openapi.json", redoc_url="/api/redoc")
+
+origins = ["http://localhost", "http://localhost:3000", "https://stats.protobox.xyz", "https://livepeer.protobox.xyz"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Load .env file
 load_dotenv()
