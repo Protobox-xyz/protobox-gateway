@@ -24,7 +24,7 @@ function App() {
       dashboardUiConfig: { // dashboard UI config: hideTitle, hideTab, hideChartControls, filters.visible, filters.expanded (optional)
         hideTitle: true,
         filters: {
-          expanded: true,
+          expanded: false,
         }
       },
     })
