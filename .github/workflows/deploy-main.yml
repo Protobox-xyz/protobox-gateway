@@ -48,4 +48,4 @@ jobs:
           script: |
             sudo su
             cd ${{ secrets.PROJECT_PATH }}
-            git pull && docker compose up api -d --build
+            git pull && docker compose up api -d --build && docker compose -f ./docker-compose-trino.yml up --build
