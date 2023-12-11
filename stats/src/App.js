@@ -29,8 +29,7 @@ function App() {
       },
     })
     const container = document.getElementById("my-superset-container");
-    container.children[0].width = "100%";
-    container.children[0].scrolling = "no";
+    container.children[0].width = "98%";
     container.children[0].height = "1000px";
   }, []);
 
