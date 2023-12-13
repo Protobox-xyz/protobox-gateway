@@ -30,7 +30,7 @@ services:
     command:
       - "start"
       - "--welcome-message='Bzzzz bzzz bzz bzz. 🐝'"
-      - '--blockchain-rpc-endpoint=https://rpc.eu-central-2.gateway.fm/v4/gnosis/non-archival/mainnet'
+      - '--blockchain-rpc-endpoint=https://nd-494-508-290.p2pify.com/b2752537b1e1fc7acb53ddcf9c2aac0c/'
       - "--debug-api-enable"
       - "--full-node"
       - "--swap-initial-deposit=0"
