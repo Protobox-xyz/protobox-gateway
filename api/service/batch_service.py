@@ -52,6 +52,8 @@ async def create_batch_task(task_id: str, owner: str, batch: BatchRequest):
         amount=batch.amount, depth=batch.depth, label=batch.label
     )
 
+    logging.info(f"post request on endpoint: {SWARM_SERVER_URL_STAMP}")
+
     if 400 <= status_code:
         logging.error(f"error while creating batch: {swarm_response}")
         MONGODB.tasks.replace_one(
