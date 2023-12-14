@@ -52,7 +52,7 @@ class SwarmClient:
         api_url = urljoin(self.server_url, f"stamps/{batch_id}")
         async with aiohttp.ClientSession() as session:
             async with session.get(api_url) as response:
-                return await response.json()
+                return await response.json(), response.status
 
     async def get_addresses(self):
         api_url = urljoin(self.server_url, f"addresses")
