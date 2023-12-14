@@ -73,7 +73,7 @@ async def create_batch_task(task_id: str, owner: str, batch: BatchRequest):
         {
             "finished": True,
             "status_code": status_code,
-            "response": {"batch_id": batch_id, "owner": owner, "info": await get_batch_info(batch_id), "_id": batch_id},
+            "response": {"batch_id": batch_id, "owner": owner, "_id": batch_id},
         },
     )
 
@@ -105,7 +105,7 @@ async def extend_batch_task(task_id: str, batch_id: str, owner: str, batch: Batc
         {
             "finished": True,
             "status_code": status_code,
-            "response": {"batch_id": batch_id, "owner": owner, "info": await get_batch_info(batch_id), "_id": batch_id},
+            "response": {"batch_id": batch_id, "owner": owner, "_id": batch_id},
         },
     )
 
