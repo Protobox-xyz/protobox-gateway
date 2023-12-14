@@ -14,7 +14,6 @@ class BatchInfo(BaseModel):
     immutableFlag: bool
     exists: bool
     batchTTL: int
-    expired: bool
 
 
 class BatchResponse(BaseModel):
