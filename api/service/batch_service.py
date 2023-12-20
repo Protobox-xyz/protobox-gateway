@@ -41,7 +41,8 @@ async def transfer_from_bzz_coins(owner_address: str, amount: int):
 
 
 async def create_batch_task(task_id: str, owner: str, batch: BatchRequest):
-    success = await transfer_from_bzz_coins(owner_address=owner, amount=batch.amount)
+    bzz_amount = 2**batch.depth * batch.amount
+    success = await transfer_from_bzz_coins(owner_address=owner, amount=bzz_amount)
 
     if not success:
         MONGODB.tasks.replace_one({"_id": task_id}, {"finished": True, "status_code": 402, "response": {}})
