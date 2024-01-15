@@ -5,12 +5,27 @@ from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from starlette import status
 from starlette.responses import Response
 
+from models.pricing import TTLResponse, PriceResponse
 from service.batch_service import create_batch_task, get_owner_batches, get_batch_info, extend_batch_task
-from settings import MONGODB
+from settings import MONGODB, POSTAGE_PRICE, BLOCK_TIME_SECONDS
 from models.batches_router import BatchResponse, BatchRequest, BatchTaskRequest, BatchExtendRequest, TaskResponse
 from utils.auth import extract_signature
 
 router = APIRouter(prefix="/api/json/batches", tags=["batches"])
+
+
+@router.get("/price", response_model=PriceResponse)
+async def handle_get_ttl(time_in_minutes: int, depth: int = 20):
+    amount = POSTAGE_PRICE / BLOCK_TIME_SECONDS * time_in_minutes * 60
+    bzz_amount = amount * 2**depth
+    return {"bzz_amount": bzz_amount, "amount": amount}
+
+
+@router.get("/ttl", response_model=TTLResponse)
+async def handle_get_ttl(bzz_amount: int, depth: int = 20):
+    amount = bzz_amount / 2**depth
+    time_in_minutes = amount * BLOCK_TIME_SECONDS / (POSTAGE_PRICE * 60)
+    return {"time_in_minutes": time_in_minutes, "amount": amount}
 
 
 @router.post("", response_model=BatchTaskRequest, status_code=status.HTTP_202_ACCEPTED)

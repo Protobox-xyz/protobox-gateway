@@ -18,6 +18,9 @@ SUPERSET_PASS = os.environ.get("SUPERSET_PASS", "admin")
 SUPRESET_ADMIN = os.environ.get("SUPRESET_ADMIN", "admin")
 
 
+POSTAGE_PRICE = 24000
+BLOCK_TIME_SECONDS = 5
+
 ERC20_ABI = [
     {
         "inputs": [
