@@ -49,7 +49,7 @@ async def create_batch_task(task_id: str, owner: str, batch: BatchRequest):
 
     swarm_client = SwarmClient(batch_id=owner, server_url=SWARM_SERVER_URL_STAMP)
 
-    plur = batch.amount / 2**batch.depth
+    plur = batch.amount // 2**batch.depth
     swarm_response, status_code = await swarm_client.create_batch(amount=plur, depth=batch.depth, label=batch.label)
 
     logging.info(f"post request on endpoint: {SWARM_SERVER_URL_STAMP}")
@@ -87,7 +87,7 @@ async def extend_batch_task(task_id: str, batch_id: str, owner: str, batch: Batc
         MONGODB.tasks.replace_one({"_id": task_id}, {"finished": True, "status_code": 402, "response": {}})
         return
 
-    plur = batch.amount / 2**batch.depth
+    plur = batch.amount // 2**batch.depth
 
     swarm_client = SwarmClient(batch_id=owner, server_url=SWARM_SERVER_URL_STAMP)
     swarm_response, status_code = await swarm_client.extend_batch(batch_id=batch_id, amount=plur)

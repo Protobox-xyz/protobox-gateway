@@ -18,14 +18,14 @@ router = APIRouter(prefix="/api/json/batches", tags=["batches"])
 async def handle_get_ttl(time_in_minutes: int, depth: int = 20):
     amount = POSTAGE_PRICE / BLOCK_TIME_SECONDS * time_in_minutes * 60
     bzz_amount = amount * 2**depth
-    return {"bzz_amount": bzz_amount, "amount": amount}
+    return {"bzz_amount": int(bzz_amount), "amount": int(amount)}
 
 
 @router.get("/ttl", response_model=TTLResponse)
 async def handle_get_ttl(bzz_amount: int, depth: int = 20):
     amount = bzz_amount / 2**depth
     time_in_minutes = amount * BLOCK_TIME_SECONDS / (POSTAGE_PRICE * 60)
-    return {"time_in_minutes": time_in_minutes, "amount": amount}
+    return {"time_in_minutes": int(time_in_minutes), "amount": int(amount)}
 
 
 @router.post("", response_model=BatchTaskRequest, status_code=status.HTTP_202_ACCEPTED)
