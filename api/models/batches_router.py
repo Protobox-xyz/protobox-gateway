@@ -33,6 +33,7 @@ class BatchRequest(BaseModel):
 
 class BatchExtendRequest(BaseModel):
     amount: int
+    depth: int = Field(default=20)
 
 
 class BatchTaskRequest(BaseModel):
