@@ -21,6 +21,7 @@ services:
     container_name: protobox-bee
     networks:
       - protobox-network
+    restart: unless-stopped
     volumes:
       - ./bee/.bee:/home/bee/.bee
     ports:
